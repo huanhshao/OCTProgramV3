@@ -83,7 +83,6 @@ private:
 	cl_kernel hist;
 	cl_float k;
 	cl_float a;
-	cl_mem deb;
 };
 class OpenCLGLClass
 {

@@ -258,8 +258,6 @@ unsigned __stdcall ACQDATA(void* lpParam)
         float* tbuffer = new float[1024 * alazar->recordsPerBuffer];
 		clock_t timeee=clock();
         while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0&&success){
-			cout<<bufferIndex<<endl;
-			if (bufferIndex==2) break;
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
             retCode = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);

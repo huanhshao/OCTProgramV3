@@ -9,7 +9,6 @@ OpenCL::OpenCL()
 	clTexMemBack=NULL;
 	k=0.1;
 	a=10;
-	deb=NULL;
 }
 void OpenCL::Initialize(OpenGL& gl){
 	if (InitCLFromGL()==1){
@@ -18,7 +17,6 @@ void OpenCL::Initialize(OpenGL& gl){
 	}
 	BindGLTexture(gl.GetFrontTex(),gl.GetBackTex());
 	AcquireTex();
-	deb=clCreateBuffer(context,CL_MEM_READ_WRITE,1024*1024*sizeof(cl_float),NULL,NULL);
 }
 void OpenCL::BindGLTexture(GLuint front,GLuint back){
 	cl_int err;
@@ -27,12 +25,7 @@ void OpenCL::BindGLTexture(GLuint front,GLuint back){
 	clTexMemBack=clCreateFromGLTexture2D(
 		context,CL_MEM_READ_WRITE,GL_TEXTURE_2D,0,back,&err);
 }
-OpenCL::~OpenCL()
-{
-	if (!deb){
-		clReleaseMemObject(deb);
-		deb=NULL;
-	}
+OpenCL::~OpenCL(){
 	clReleaseMemObject(clTexMemFront);
 	clReleaseMemObject(clTexMemBack);
 	if (kfft){
@@ -82,6 +75,7 @@ int OpenCL::LoadProgram(const char* filename)
 		char buffer[0x2048];
 		clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
 		cout<<buffer<<endl;
+		system("pause");
 #endif
 		program=0;
 		assert(false);
@@ -163,7 +157,6 @@ int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count)
 	clSetKernelArg(kfft, 1, sizeof(cl_mem), (void *)&clTexMemBack);
 	clSetKernelArg(kfft, 2, sizeof(cl_float), (void *)&k);
 	clSetKernelArg(kfft, 3, sizeof(cl_float), (void *)&a);
-	clSetKernelArg(kfft, 4, sizeof(cl_mem), (void *)&deb);
 	ReleaseMutex(_HMutex);
 	cl_event fftEvent;
 	clEnqueueNDRangeKernel(queue, kfft, 2, NULL, gws, lws, 1, &pms->writeEvent, &fftEvent);

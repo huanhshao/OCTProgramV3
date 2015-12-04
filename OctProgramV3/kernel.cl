@@ -1,15 +1,13 @@
 #define _PI 3.1415926535897
 __attribute__((always_inline)) float
-logout(float2 in,float k,float a)
-{
+logout(float2 in,float k,float a){
 	float tmp=(log(length(in)/8+1)-k)*a;
 	tmp=tmp>1?1:tmp;
 	tmp=tmp<0?0:tmp;
 	return tmp;
 }
 __attribute__((always_inline)) void
-twidle_factor(float k,float angle,float2* in) 
-{
+twidle_factor(float k,float angle,float2* in){
 	float2 tw, v;
 	tw.x = cos(k*angle);
 	tw.y = sin(k*angle);
@@ -18,8 +16,7 @@ twidle_factor(float k,float angle,float2* in)
 	(*in)=v;
 }
 __attribute__((always_inline)) void
-FFT4(float2* in0, float2* in1, float2* in2, float2* in3)
-{
+FFT4(float2* in0, float2* in1, float2* in2, float2* in3){
 	float2 v0, v1, v2, v3;
 	v0 = *in0 + *in2;
 	v1 = *in1 + *in3;
@@ -31,19 +28,26 @@ FFT4(float2* in0, float2* in1, float2* in2, float2* in3)
 	*in1 = v2 + v3;
 	*in3 = v2 - v3;
 }
+__attribute__((always_inline)) void
+MyWriteImage(__write_only image2d_t img,float4 colors,uint gid,uint lid){
+	float4 color=(float4)(colors.x,colors.x,colors.x,1.0);
+	int2 coord=(int2)(gid,lid);
+	write_imagef(img,coord,color);
+	coord.x=gid+256;
+	color=(float4)(colors.y,colors.y,colors.y,1.0);
+	write_imagef(img,coord,color);
+	coord.x=gid+256*2;
+	color=(float4)(colors.z,colors.z,colors.z,1.0);
+	write_imagef(img,coord,color);
+	coord.x=gid+256*3;
+	color=(float4)(colors.w,colors.w,colors.w,1.0);
+	write_imagef(img,coord,color);
+}
 __kernel __attribute__((reqd_work_group_size (256,1,1))) void
-kfft(__global float* data,__write_only image2d_t img,float k,float a,
-	__global float* out){
+kfft(__global float* data,__write_only image2d_t img,float k,float a){
 	uint gid=get_local_id(0);
 	uint lid=get_group_id(1);
 	gid=gid&0xffu;
-	//debug
-	int2 coord=(int2)(gid,lid);
-	float color=1;
-	out[coord.x+coord.y*1024]=color;
-	float4 tmpcolor=(float4)(color,color,color,1.0);
-	write_imagef(img,coord,tmpcolor);
-	return;
 
 	__local float lds[2048];
 	__global float* gr=(__global float*)(data+gid+(lid*1024));
@@ -121,32 +125,10 @@ kfft(__global float* data,__write_only image2d_t img,float k,float a,
 	twidle_factor(3, angle, &in3);
 	FFT4(&in0,&in1,&in2,&in3);
 
-	int w=get_image_width(img);
-	int h=get_image_height(img);
-	if ( (gid+256*3)<w && (lid)<h ){
-		int2 coord=(int2)(gid,lid);
-		float color=logout(in0,k,a);
-		out[coord.x+coord.y*1024]=color;
-		float4 tmpcolor=(float4)(color,color,color,1.0);
-		write_imagef(img,coord,tmpcolor);
-
-		coord.x=gid+256;
-		color=logout(in1,k,a);
-		out[coord.x+coord.y*1024]=color;
-		tmpcolor=(float4)(color,color,color,1.0);
-		write_imagef(img,coord,tmpcolor);
-
-		coord.x=gid+256*2;
-		color=logout(in2,k,a);
-		out[coord.x+coord.y*1024]=color;
-		tmpcolor=(float4)(color,color,color,1.0);
-		write_imagef(img,coord,tmpcolor);
-
-		coord.x=gid+256*3;
-		color=logout(in3,k,a);
-		out[coord.x+coord.y*1024]=color;
-		tmpcolor=(float4)(color,color,color,1.0);
-		write_imagef(img,coord,tmpcolor);
+	float4 colors=(float4)(logout(in0,k,a),logout(in1,k,a),logout(in2,k,a),logout(in3,k,a));
+	//float4 colors=(float4)(0.0,0.33,0.66,1.0);
+	if ((gid+256*3) < get_image_width(img) && (lid) < get_image_height(img)){
+		MyWriteImage(img,colors,gid,lid);
 	}
 }
 __kernel __attribute__((reqd_work_group_size (256,1,1))) void
