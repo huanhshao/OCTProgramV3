@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\AdvantInfo.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AlazarInfo.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AssemblyInfo.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CLGL.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MulThrdHds.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OCTProgram.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenGL.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\thread.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenCL.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentsOfForm.cpp">
+      <Filter>Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigrationForm.cpp">
+      <Filter>Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadForm.cpp">
+      <Filter>Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="MainForm.cpp">
+      <Filter>Forms</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConfigrationForm.h" />
+    <ClInclude Include="LoadForm.h" />
+    <ClInclude Include="MainForm.h" />
+    <ClInclude Include="include\thread.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\stdafx.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MulThrdHds.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AdvantInfo.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AlazarInfo.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CLGL.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponetsOfForm.h">
+      <Filter>Forms</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ConfigrationForm.resx" />
+    <EmbeddedResource Include="MainForm.resx" />
+    <EmbeddedResource Include="MainWindow.resx">
+      <Filter>Forms</Filter>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="kernel.cl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header">
+      <UniqueIdentifier>{ac7f982e-85fb-4dff-b43f-c7d0eafefdfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{15e1e3bb-389a-479f-918d-d0dd92bc1dbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Forms">
+      <UniqueIdentifier>{6b56ae98-89eb-4d9b-88bd-94961066aa77}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

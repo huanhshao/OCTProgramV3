@@ -1,0 +1,10 @@
+debug/
+release/
+OctprogramV3/debug/
+OctprogramV3/release/
+*.txt
+*.ini
+*.bas
+*.pas
+*.dll
+*.lib

@@ -1,0 +1,49 @@
+# 1 4
+1 1 2 2 3 3 4 4
+# 2 2
+10M 10000000 250M 250000000 1G 1000000000
+# 3 1
+1 1
+# 4 1
+1 1
+# 5 1
+Internal 1
+# 6 2
+10MSps 28 250MSps 43 1GSps 53
+# 7 1
+Rise 0 Fall 1
+# 8 1
+0 0
+# 9 2
+ChannelA 1 ChannelB 2 Both 3
+# 10 2
+AC 1 DC 2
+# 11 1
+PM_100mV 5 PM_200mV 6 PM_400mV 7 PM_1V 10 PM_2V 11
+# 12 1
+50Ohm 2
+# 13 2
+AC 1 DC 2
+# 14 1
+PM_100mV 5 PM_200mV 6 PM_400mV 7 PM_1V 10 PM_2V 11
+# 15 1
+50Ohm 2
+# 16 1
+EngineJ 0
+# 17 1
+External 2
+# 18 1
+Disable 3
+# 19 1
+Positive 1
+# 20 1
+Positive 1
+# 21 1
+0 128 -50% 64 50% 192
+# 22 1
+0 128 -50% 64 50% 192
+# 23 1
+DC 2
+# 24 2
+ETR_5V 0 ETR_1V 1
+#
