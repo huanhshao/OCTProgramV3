@@ -138,7 +138,7 @@ void OpenGL::RenderScene(){
 	glPopMatrix();
 	SwapBuffers(m_hDC);
 }
-bool OpenGL::CaptureScreen(int c){
+bool OpenGL::CaptureScreen(){
 	GLint viewport[4]; 
 	glGetIntegerv( GL_VIEWPORT, viewport ); 
 	GLint width  = viewport[2]; 
@@ -169,13 +169,10 @@ bool OpenGL::CaptureScreen(int c){
 	bitmapInfoHeader.biClrUsed = 0; 
 	bitmapInfoHeader.biClrImportant = 0; 
 	char index[3];
-	index[2]='\0';
-	if (c>=100){
-		c=c%100;
-	}
-	index[0]='0'+c/10;
-	index[1]='0'+c%10;
-	std::string filename="Capture\\grab"+std::string(index)+".bmp";
+	time_t t=time(0);
+	char tmp[64];
+	strftime(tmp,sizeof(tmp),"%Y_%m_%d_%H_%M_%S",localtime(&t));
+	std::string filename="Capture\\grab_"+std::string(tmp)+".bmp";
 	std::ofstream ofs(filename,std::ios::out|std::ios::binary);
 	if (!ofs){
 		free(bmpBuffer);

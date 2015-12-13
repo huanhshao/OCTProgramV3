@@ -114,9 +114,9 @@ void OpenCLGLClass::RenderScene()
 {
 	mgl.RenderScene();
 }
-bool OpenCLGLClass::CaptureScreen(int c)
+bool OpenCLGLClass::CaptureScreen()
 {
-	return mgl.CaptureScreen(c);
+	return mgl.CaptureScreen();
 }
 void OpenCLGLClass::CalHistogram(int* hst)
 {

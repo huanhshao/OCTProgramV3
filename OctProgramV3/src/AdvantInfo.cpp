@@ -49,7 +49,7 @@ namespace OCTProgram{
 		}
 	}
 	bool AdvInfo::StartWaveOut(){
-		//return false;
+		//return true;
 		if (globle_mem_out_handle_==NULL||globle_mem_out_==nullptr){
 			cout<<"ERROR!!Can't Find Data Buffer!!"<<endl;
 			return false;
@@ -70,10 +70,11 @@ namespace OCTProgram{
 			return false;
 		}
 		event_thread_handle_ = (HANDLE)_beginthreadex(NULL, 0, &EVENTPROCESSOR, &ep, 0, NULL);
+		return true;
 	}
 	bool AdvInfo::StopWaveOut(){
 		if (event_thread_handle_==NULL){
-			return false;
+			return true;
 		}
 		bool success=true;
 		DWORD dwErrCde = DRV_FAOTerminate(driver_handle_);

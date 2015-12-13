@@ -248,15 +248,14 @@ unsigned __stdcall ACQDATA(void* lpParam)
             if (retCode != ApiSuccess) success = false;
         }
         if (success){
-			DWORD dwErrCde = adv->StartWaveOut();
+			bool scs= adv->StartWaveOut();
             retCode = AlazarStartCapture(alazar->boardHandle);
-            if (retCode != ApiSuccess || dwErrCde!= SUCCESS) success = false;
+            if (retCode != ApiSuccess || scs!= true) success = false;
         }
         // Wait for each buffer to be filled, process the buffer, and re-post it to the board.
         timeout_ms = 5000;	//Timeout Long Enough
         bufferIndex = 0;
         float* tbuffer = new float[1024 * alazar->recordsPerBuffer];
-		clock_t timeee=clock();
         while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0&&success){
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
@@ -331,9 +330,9 @@ unsigned __stdcall ACQDATA(void* lpParam)
         // Abort the acquisition
         delete[] tbuffer;
         tbuffer = nullptr;
-		DWORD dwErrCde=adv->StopWaveOut();
+		bool scs=adv->StopWaveOut();
         retCode = AlazarAbortAsyncRead(alazar->boardHandle);
-        if (retCode != ApiSuccess||dwErrCde!=SUCCESS) success = false;
+        if (retCode != ApiSuccess||scs!=true) success = false;
         if (fpData != NULL){
             strpro = new char[4];
             strpro[0] = savedBuffer / 16777215;

@@ -23,7 +23,7 @@ public:
 	bool Init(HDC hdc);
 	void RenderScene();
 	void ViewPort(int x, int y, int width, int height);
-	bool CaptureScreen(int c);
+	bool CaptureScreen();
 	void SwapTexture();
 	GLuint GetFrontTex();
 	GLuint GetBackTex();
@@ -98,7 +98,7 @@ public:
 
 	void SetViewPort(int x,int y,int width,int height);
 	void RenderScene();
-	bool CaptureScreen(int c);
+	bool CaptureScreen();
 	int GetFPS();
 
 	void CalHistogram(int* hst);

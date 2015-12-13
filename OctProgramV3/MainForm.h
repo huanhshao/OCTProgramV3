@@ -38,7 +38,6 @@ namespace OCTProgram {
 			cgl->Initialize(dc, w, h);
 			cgl->SetViewPort(0, 0, this->ClientSize.Width, this->ClientSize.Height);
 			cgl->RenderScene();
-			save_count = 0;
 			//create threads
 			ap = new AcqParam;
 			ap->alazar = alazar;
@@ -114,7 +113,6 @@ namespace OCTProgram {
 		AdvInfo* adv;
 		AcqParam* ap;
 		ProcessParam* pp;
-		int save_count;
 
 	private: System::Windows::Forms::ToolStripMenuItem^  exitToolStripMenuItem;
 	private: System::Windows::Forms::DataVisualization::Charting::Chart^  chart1;
@@ -563,12 +561,11 @@ private: System::Windows::Forms::Label^  label2;
 				 this->StartAcqBotton->Enabled = true;
 			 }
 	private: System::Void toolStripCapScr_Click(System::Object^  sender, System::EventArgs^  e) {
-				 if (!cgl->CaptureScreen(save_count))
+				 if (!cgl->CaptureScreen())
 				 {
 					 MessageBox::Show(L"Capture Screen Failure!");
 					 return;
 				 }
-				 save_count++;
 			 }
 	private: System::Void trackBar1_Scroll(System::Object^  sender, System::EventArgs^  e) {
 				 this->SetColor();
@@ -606,7 +603,7 @@ private: System::Windows::Forms::Label^  label2;
 				this->label3->Text=System::Convert::ToString(i2);
 			}
 	private: System::Void SaveDataButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 cgl->CaptureScreen(save_count++);
+				 cgl->CaptureScreen();
 				 //adv->StartWaveOut();
 				 //MessageBox::Show(L"This botton is not used now!!");
 				 //WaitForSingleObject(_HMutex, INFINITE);
