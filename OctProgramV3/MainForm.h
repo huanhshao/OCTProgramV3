@@ -376,9 +376,9 @@ private: System::Windows::Forms::Label^  label2;
 				 this->groupBoxGradation->Font = (gcnew System::Drawing::Font(L"宋体", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 					 static_cast<System::Byte>(134)));
 				 this->groupBoxGradation->ForeColor = System::Drawing::SystemColors::ControlText;
-				 this->groupBoxGradation->Location = System::Drawing::Point(760, 520);
+				 this->groupBoxGradation->Location = System::Drawing::Point(565, 583);
 				 this->groupBoxGradation->Name = L"groupBoxGradation";
-				 this->groupBoxGradation->Size = System::Drawing::Size(220, 173);
+				 this->groupBoxGradation->Size = System::Drawing::Size(415, 100);
 				 this->groupBoxGradation->TabIndex = 3;
 				 this->groupBoxGradation->TabStop = false;
 				 this->groupBoxGradation->Text = L"色阶调整";
@@ -387,7 +387,7 @@ private: System::Windows::Forms::Label^  label2;
 				 // label3
 				 // 
 				 this->label3->AutoSize = true;
-				 this->label3->Location = System::Drawing::Point(120, 17);
+				 this->label3->Location = System::Drawing::Point(77, 17);
 				 this->label3->Name = L"label3";
 				 this->label3->Size = System::Drawing::Size(41, 12);
 				 this->label3->TabIndex = 4;
@@ -413,7 +413,7 @@ private: System::Windows::Forms::Label^  label2;
 				 chartArea1->Position->Height = 100;
 				 chartArea1->Position->Width = 100;
 				 this->chart1->ChartAreas->Add(chartArea1);
-				 this->chart1->Location = System::Drawing::Point(18, 32);
+				 this->chart1->Location = System::Drawing::Point(214, 32);
 				 this->chart1->Name = L"chart1";
 				 this->chart1->Size = System::Drawing::Size(182, 59);
 				 this->chart1->TabIndex = 2;
@@ -421,23 +421,23 @@ private: System::Windows::Forms::Label^  label2;
 				 // 
 				 // trackBar2
 				 // 
-				 this->trackBar2->Location = System::Drawing::Point(0, 120);
-				 this->trackBar2->Maximum = 50;
+				 this->trackBar2->Location = System::Drawing::Point(0, 57);
+				 this->trackBar2->Maximum = 70;
 				 this->trackBar2->Name = L"trackBar2";
 				 this->trackBar2->Size = System::Drawing::Size(208, 45);
 				 this->trackBar2->TabIndex = 1;
-				 this->trackBar2->Value = 10;
+				 this->trackBar2->Value = 40;
 				 this->trackBar2->Scroll += gcnew System::EventHandler(this, &MainForm::trackBar2_Scroll);
 				 // 
 				 // trackBar1
 				 // 
 				 this->trackBar1->LargeChange = 10;
-				 this->trackBar1->Location = System::Drawing::Point(0, 97);
+				 this->trackBar1->Location = System::Drawing::Point(0, 32);
 				 this->trackBar1->Maximum = 200;
 				 this->trackBar1->Name = L"trackBar1";
 				 this->trackBar1->Size = System::Drawing::Size(208, 45);
 				 this->trackBar1->TabIndex = 0;
-				 this->trackBar1->Value = 110;
+				 this->trackBar1->Value = 85;
 				 this->trackBar1->Scroll += gcnew System::EventHandler(this, &MainForm::trackBar1_Scroll);
 				 // 
 				 // timer1
@@ -524,7 +524,7 @@ private: System::Windows::Forms::Label^  label2;
 				 int width = this->ClientSize.Width;
 				 int height = this->ClientSize.Height;
 				 cgl->SetViewPort(0, 0, width, height);
-				 this->groupBoxGradation->Location = System::Drawing::Point(width - 240, height - 260);
+				 //this->groupBoxGradation->Location = System::Drawing::Point(width - 240, height - 260);
 			 }
 	private: System::Void MainForm_Load(System::Object^  sender, System::EventArgs^  e) {
 				 this->chart1->Series->Clear();
@@ -533,8 +533,8 @@ private: System::Windows::Forms::Label^  label2;
 				 this->label1->Visible = true;
 #endif
 				 this->timer1->Enabled = true;
-				 this->groupBoxGradation->Location = System::Drawing::Point(
-					 this->ClientSize.Width - 240, this->ClientSize.Height - 260);
+				 //this->groupBoxGradation->Location = System::Drawing::Point(
+					// this->ClientSize.Width - 240, this->ClientSize.Height - 260);
 				 cout<<"OCT Processing Program. V1.0. Copyright @ Huan_OTDM3105."<<endl
 					 <<"Initializing...OK"<<endl;
 			 }
@@ -597,7 +597,7 @@ private: System::Windows::Forms::Label^  label2;
 			}
 	private:void SetColor(){
 				double i1=static_cast<double>(trackBar1->Value)/10-5;
-				double i2=static_cast<double>(trackBar2->Value)/10+0.1;
+				double i2=static_cast<double>(trackBar2->Value+1)/10;
 				cgl->SetColorLevels(i1,i2);
 				this->label2->Text=System::Convert::ToString(i1);
 				this->label3->Text=System::Convert::ToString(i2);

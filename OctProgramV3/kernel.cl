@@ -1,7 +1,11 @@
 #define _PI 3.1415926535897
 __attribute__((always_inline)) float
 logout(float2 in,float k,float a){
-	float tmp=(log(length(in)/8+1)-k)*a;
+	//float tmp=(log(length(in)+1e-6)-k)/a;
+	float tmp=log(length(in)+1e-6);
+	if (tmp<k) tmp=tmp/k*0.1;
+	else if (tmp>a) tmp=(tmp-a)/(10-a)*0.1+0.9;
+	else tmp=(tmp-k)/(a-k)*0.8+0.1;
 	tmp=tmp>1?1:tmp;
 	tmp=tmp<0?0:tmp;
 	return tmp;
@@ -51,10 +55,10 @@ kfft(__global float* data,__write_only image2d_t img,float k,float a){
 
 	__local float lds[2048];
 	__global float* gr=(__global float*)(data+gid+(lid*1024));
-	float2 in0=(float2)((float)gr[0*256]*8,0);
-	float2 in1=(float2)((float)gr[1*256]*8,0);
-	float2 in2=(float2)((float)gr[2*256]*8,0);
-	float2 in3=(float2)((float)gr[3*256]*8,0);
+	float2 in0=(float2)((float)gr[0*256],0);
+	float2 in1=(float2)((float)gr[1*256],0);
+	float2 in2=(float2)((float)gr[2*256],0);
+	float2 in3=(float2)((float)gr[3*256],0);
 
 	uint ns=1;
 	uint kw=4;
