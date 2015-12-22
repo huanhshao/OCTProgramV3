@@ -64,10 +64,10 @@ namespace OCTProgram
 			{
 #ifdef _WIN32
 				bufferArray[bufferIndex] = static_cast<U8*>(
-					VirtualAlloc(NULL, bytesPerBuffer, MEM_COMMIT, PAGE_READWRITE)
+					VirtualAlloc(NULL, bytesPerBuffer*2, MEM_COMMIT, PAGE_READWRITE)
 					);
 #else
-				bufferArray[bufferIndex] = static_cast<U8*>(malloc(bytesPerBuffer));
+				bufferArray[bufferIndex] = static_cast<U8*>(malloc(bytesPerBuffer*2));
 #endif
 				if (bufferArray[bufferIndex] == NULL)
 				{
@@ -310,9 +310,9 @@ namespace OCTProgram
 		}
 		// Calculate the size of each DMA buffer in bytes
 		bytesPerSample = (bitsPerSample + 7) / 8;
-		samplesPerRecord = preTriggerSamples + postTriggerSamples;//2048
-		bytesPerRecord = bytesPerSample * samplesPerRecord;//2048
-		bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;//2048000
+		samplesPerRecord = preTriggerSamples + postTriggerSamples;
+		bytesPerRecord = bytesPerSample * samplesPerRecord;
+		bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;
 		return retCode;
 	}
 	bool AlazarInfo::IsAcqStoped()

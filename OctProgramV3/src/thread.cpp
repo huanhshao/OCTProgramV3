@@ -209,10 +209,11 @@ unsigned __stdcall ACQDATA(void* lpParam)
         }
         ///////////////////////Acq Begin///////////////////////////
         alazar->SetChannalMask(1);			//CHANNAL_A = 1
+		//alazar->SetChannalMask(3);				//CHANNAL_A | B = 3
         fpData = fopen("../../../data.bin", "wb");
         strpro = "OCT Data Created By OCTProgram V2.1. Image Size:";
         fwrite(strpro, sizeof(BYTE), 49, fpData);
-		bool first_acq = true;
+		int acq_time = 0;
 		strpro = new char[4];
         strpro[0] = alazar->bytesPerRecord / 256;
         strpro[1] = alazar->bytesPerRecord % 256;
@@ -262,7 +263,8 @@ unsigned __stdcall ACQDATA(void* lpParam)
             retCode = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
             if (retCode != ApiSuccess) success = false;
             if (success){
-				if (first_acq){
+				//if (acq_time%100==0&&acq_time<1001){
+				if (acq_time==0){
 					U8* pRecord = pBuffer;
 					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
 					    for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++){
@@ -272,8 +274,9 @@ unsigned __stdcall ACQDATA(void* lpParam)
 					        savedBuffer++;
 					    }
 					}
-					first_acq=false;
+					//cout<<acq_time/100<<endl;
 				}
+				acq_time++;
 				for (int j = 0; j<1024; j++){
 					int line_id=calib_param[j];
 					if (line_id<0){
