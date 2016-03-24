@@ -40,6 +40,9 @@
     <ClCompile Include="MainForm.cpp">
       <Filter>Forms</Filter>
     </ClCompile>
+    <ClCompile Include="include\3rdparty\jsoncpp\jsoncpp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConfigrationForm.h" />
@@ -69,6 +72,9 @@
     <ClInclude Include="ComponetsOfForm.h">
       <Filter>Forms</Filter>
     </ClInclude>
+    <ClInclude Include="include\3rdparty\jsoncpp\json.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ConfigrationForm.resx" />
@@ -76,9 +82,6 @@
     <EmbeddedResource Include="MainWindow.resx">
       <Filter>Forms</Filter>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="kernel.cl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header">
@@ -90,5 +93,10 @@
     <Filter Include="Forms">
       <UniqueIdentifier>{6b56ae98-89eb-4d9b-88bd-94961066aa77}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="kernel.cl">
+      <Filter>Source</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -75,6 +75,7 @@
     <ClInclude Include="ConfigrationForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="include\3rdparty\jsoncpp\json.h" />
     <ClInclude Include="include\AdvantInfo.h" />
     <ClInclude Include="include\AlazarInfo.h" />
     <ClInclude Include="include\CLGL.h" />
@@ -92,6 +93,7 @@
   <ItemGroup>
     <ClCompile Include="ComponentsOfForm.cpp" />
     <ClCompile Include="ConfigrationForm.cpp" />
+    <ClCompile Include="include\3rdparty\jsoncpp\jsoncpp.cpp" />
     <ClCompile Include="LoadForm.cpp" />
     <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="src\AdvantInfo.cpp" />

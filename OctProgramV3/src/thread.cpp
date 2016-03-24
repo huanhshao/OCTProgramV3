@@ -208,8 +208,8 @@ unsigned __stdcall ACQDATA(void* lpParam)
             continue;
         }
         ///////////////////////Acq Begin///////////////////////////
-        alazar->SetChannalMask(1);			//CHANNAL_A = 1
-		//alazar->SetChannalMask(3);				//CHANNAL_A | B = 3
+        //alazar->SetChannalMask(1);			//CHANNAL_A = 1
+		alazar->SetChannalMask(3);				//CHANNAL_A | B = 3
         fpData = fopen("../../../data.bin", "wb");
         strpro = "OCT Data Created By OCTProgram V2.1. Image Size:";
         fwrite(strpro, sizeof(BYTE), 49, fpData);
@@ -263,8 +263,8 @@ unsigned __stdcall ACQDATA(void* lpParam)
             retCode = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
             if (retCode != ApiSuccess) success = false;
             if (success){
-				//if (acq_time%100==0&&acq_time<1001){
-				if (acq_time==0){
+				if (acq_time%100==0&&acq_time<1001){
+				//if (acq_time==0){
 					U8* pRecord = pBuffer;
 					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
 					    for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++){
@@ -274,7 +274,7 @@ unsigned __stdcall ACQDATA(void* lpParam)
 					        savedBuffer++;
 					    }
 					}
-					//cout<<acq_time/100<<endl;
+					cout<<acq_time/100<<endl;
 				}
 				acq_time++;
 				for (int j = 0; j<1024; j++){
@@ -289,8 +289,8 @@ unsigned __stdcall ACQDATA(void* lpParam)
 						avg+=pBuffer[i*alazar->bytesPerRecord + line_id];
 					avg/=alazar->recordsPerBuffer;
 					for (int i = 0; i<alazar->recordsPerBuffer; i++){
-						tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
-                        //tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-avg;
+						//tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
+                        tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
 					}
                 }
                 if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0)

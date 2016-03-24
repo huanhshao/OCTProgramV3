@@ -12,10 +12,8 @@ namespace OCTProgram
 		~AlazarInfo();
 	public:
 		HANDLE boardHandle;
-		int acqMode;
-		char saveName[30];
 
-		unsigned int BUFFER_COUNT;
+		int BUFFER_COUNT;
 		U8** bufferArray;
 		U32 inputChannel;
 
@@ -29,9 +27,9 @@ namespace OCTProgram
 		U32 bytesPerBuffer;
 		int buffersPerImage;
 	protected:
-		double samplesPerSec;
 		U32 systemId;
 		U32 boardId;
+		double samplesPerSec;
 
 		U32 clockSourceId;
 		U32 sampleRateId;
@@ -52,10 +50,8 @@ namespace OCTProgram
 		U32 triggerSourceIdK;
 		U32 triggerSlopeIdK;
 		U32 triggerLevelK;
-
 		U32 triggerExCouplingId;
 		U32 triggerExRangeId;
-
 		double triggerDelaySec;
 		double triggerTimeoutSec;
 
@@ -72,7 +68,7 @@ namespace OCTProgram
 		bool IsAcqStoped();
 		void BeginAcq();
 		void StopAcq();
-		int CalibData(int mode,char* dataFile,char* indexFile);
+		//int CalibData(int mode,char* dataFile,char* indexFile);
 		void SetChannalMask(int channalID);
 	private:
 		bool GetCfgParam(char*);

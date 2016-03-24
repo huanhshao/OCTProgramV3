@@ -31,9 +31,8 @@ namespace OCTProgram {
 			alazar = new AlazarInfo();
 			adv = new AdvInfo();
 			dc = GetDC((HWND)(this->Handle.ToInt32()));
-			int w = 0;
-			int h = 0;
-			alazar->GetImageSize(&w, &h);	//w=1024,h=records per buffer
+			int w = 1024;
+			int h = 1000;
 			adv->SetSignal(1.0,0.0,h);
 			cgl->Initialize(dc, w, h);
 			cgl->SetViewPort(0, 0, this->ClientSize.Width, this->ClientSize.Height);

@@ -17,31 +17,25 @@ namespace OCTProgram {
 	/// <summary>
 	/// FormConfigration1 摘要
 	/// </summary>
-	public ref class FormConfigration1 : public System::Windows::Forms::Form
-	{
+	public ref class FormConfigration1 : public System::Windows::Forms::Form{
 	public:
-		FormConfigration1(void)
-		{
+		FormConfigration1(void){
 			InitializeComponent();
 			sFlNm=L"";
 			isFlSd=false;
 		}
-		String^ GetFileName()
-		{
+		String^ GetFileName(){
 			return sFlNm;
 		}
-		bool IsConfSaved()
-		{
+		bool IsConfSaved(){
 			return isFlSd;
 		}
 	protected:
 		/// <summary>
 		/// 清理所有正在使用的资源。
 		/// </summary>
-		~FormConfigration1()
-		{
-			if (components)
-			{
+		~FormConfigration1(){
+			if (components){
 				delete components;
 			}
 		}
@@ -1193,14 +1187,12 @@ private: System::Windows::Forms::Label^  label34;
 			 }
 #pragma endregion
 	private: 
-		System::Void BNCfgCancle_Click(System::Object^  sender, System::EventArgs^  e)
-		{
+		System::Void BNCfgCancle_Click(System::Object^  sender, System::EventArgs^  e){
 			isFlSd=false;
 			this->Close();
 		}
 	private: 
-		System::Void BNCfgSave_Click(System::Object^  sender, System::EventArgs^  e)
-		{
+		System::Void BNCfgSave_Click(System::Object^  sender, System::EventArgs^  e){
 			System::IO::Stream^ fs;
 			System::IO::StreamWriter^ sw;
 			SaveFileDialog ^sfdBoradInfo=gcnew SaveFileDialog();
@@ -1210,84 +1202,65 @@ private: System::Windows::Forms::Label^  label34;
 			sfdBoradInfo->RestoreDirectory=true;
 			sfdBoradInfo->DefaultExt=L".ini";
 			sfdBoradInfo->AddExtension=true;
-			if (sfdBoradInfo->ShowDialog()==System::Windows::Forms::DialogResult::OK)
-			{
-				if ((fs=sfdBoradInfo->OpenFile())!=nullptr)
-				{
+			if (sfdBoradInfo->ShowDialog()==System::Windows::Forms::DialogResult::OK){
+				if ((fs=sfdBoradInfo->OpenFile())!=nullptr){
+					//begin write
+					Json::Value root;
+					Json::Value sys;
+					sys["buffer_count"]=((ComboBoxItem^)(this->comboBox1->SelectedItem))->Value();
+					sys["samples_per_second"]=((ComboBoxItem^)(this->comboBox2->SelectedItem))->Value();
+					sys["system_id"]=((ComboBoxItem^)(this->comboBox3->SelectedItem))->Value();
+					sys["board_id"]=((ComboBoxItem^)(this->comboBox4->SelectedItem))->Value();
+					root["system"]=sys;
+					Json::Value clk;
+					clk["clock_source"]=((ComboBoxItem^)(this->comboBox5->SelectedItem))->Value();
+					clk["sample_rate"]=((ComboBoxItem^)(this->comboBox6->SelectedItem))->Value();
+					clk["clock_edge"]=((ComboBoxItem^)(this->comboBox7->SelectedItem))->Value();
+					clk["clock_decimation"]=((ComboBoxItem^)(this->comboBox8->SelectedItem))->Value();
+					root["clock"]=clk;
+					Json::Value chnl;
+					chnl["input_channel"]=((ComboBoxItem^)(this->comboBox9->SelectedItem))->Value();
+					Json::Value chA;
+					chA["input_coupling"]=((ComboBoxItem^)(this->comboBox10->SelectedItem))->Value();
+					chA["input_range"]=((ComboBoxItem^)(this->comboBox11->SelectedItem))->Value();
+					chA["input_impedance"]=((ComboBoxItem^)(this->comboBox12->SelectedItem))->Value();
+					chnl["channel_A"]=chA;
+					Json::Value chB;
+					chB["input_coupling"]=((ComboBoxItem^)(this->comboBox13->SelectedItem))->Value();
+					chB["input_range"]=((ComboBoxItem^)(this->comboBox14->SelectedItem))->Value();
+					chB["input_impedance"]=((ComboBoxItem^)(this->comboBox15->SelectedItem))->Value();
+					chnl["channel_B"]=chB;
+					root["channel"]=chnl;
+					Json::Value trg;
+					trg["trigger_operation"]=((ComboBoxItem^)(this->comboBox16->SelectedItem))->Value();
+					Json::Value engine_J,engine_K;
+					engine_J["trigger_source"]=((ComboBoxItem^)(this->comboBox17->SelectedItem))->Value();
+					engine_J["trigger_slope"]=((ComboBoxItem^)(this->comboBox19->SelectedItem))->Value();
+					engine_J["trigger_level"]=((ComboBoxItem^)(this->comboBox21->SelectedItem))->Value();
+					trg["trigger_engine_J"]=engine_J;
+					engine_K["trigger_source"]=((ComboBoxItem^)(this->comboBox18->SelectedItem))->Value();
+					engine_K["trigger_slope"]=((ComboBoxItem^)(this->comboBox20->SelectedItem))->Value();
+					engine_K["trigger_level"]=((ComboBoxItem^)(this->comboBox22->SelectedItem))->Value();
+					trg["trigger_engine_K"]=engine_K;
+					trg["trigger_ex_coupling"]=((ComboBoxItem^)(this->comboBox23->SelectedItem))->Value();
+					trg["trigger_ex_range"]=((ComboBoxItem^)(this->comboBox24->SelectedItem))->Value();
+					trg["trigger_delay"]=double::Parse(this->textBox1->Text);
+					trg["trigger_timeout"]=double::Parse(this->textBox2->Text);
+					root["trigger"]=trg;
+					Json::Value aux;
+					aux["mode"]="0";
+					aux["parameters"]="0";
+					root["AUX"]=aux;
+					Json::Value acq;
+					acq["pre_trigger_samples"]=int::Parse(this->textBox3->Text);
+					acq["post_trigger_samples"]=int::Parse(this->textBox4->Text);
+					acq["record_per_buffer"]=int::Parse(this->textBox5->Text);
+					acq["buffers_per_image"]=int::Parse(this->textBox7->Text);
+					root["acqusition_params"]=acq;
+					Json::FastWriter writer;
+					std::string output=writer.write(root);
 					sw=gcnew StreamWriter(fs);
-					sw->Write(L"System Info #\r\nBUFFER_COUNT=");
-					sw->Write(((ComboBoxItem^)(this->comboBox1->SelectedItem))->Value());
-					sw->Write(L"\r\nsamplesPerSec=");
-					sw->Write(((ComboBoxItem^)(this->comboBox2->SelectedItem))->Value());
-					sw->Write(L"\r\nsystemId=");
-					sw->Write(((ComboBoxItem^)(this->comboBox3->SelectedItem))->Value());
-					sw->Write(L"\r\nboardId=");
-					sw->Write(((ComboBoxItem^)(this->comboBox4->SelectedItem))->Value());
-					sw->Write(L"\r\n\r\nClock #\r\nclockSourceId=");
-					sw->Write(((ComboBoxItem^)(this->comboBox5->SelectedItem))->Value());
-					sw->Write(L"\r\nSampleRateId=");
-					sw->Write(((ComboBoxItem^)(this->comboBox6->SelectedItem))->Value());
-					sw->Write(L"\r\nclockEdgeId=");
-					sw->Write(((ComboBoxItem^)(this->comboBox7->SelectedItem))->Value());
-					sw->Write(L"\r\nclockDecimation=");
-					sw->Write(((ComboBoxItem^)(this->comboBox8->SelectedItem))->Value());
-					sw->Write(L"\r\n\r\nChannelInput #\r\ninputChannel=");
-					sw->Write(((ComboBoxItem^)(this->comboBox9->SelectedItem))->Value());
-					sw->Write(L"\r\ninputCouplingIdA=");
-					sw->Write(((ComboBoxItem^)(this->comboBox10->SelectedItem))->Value());
-					sw->Write(L"\r\ninputRangeIdA=");
-					sw->Write(((ComboBoxItem^)(this->comboBox11->SelectedItem))->Value());
-					sw->Write(L"\r\ninputImpedanceIdA=");
-					sw->Write(((ComboBoxItem^)(this->comboBox12->SelectedItem))->Value());
-					sw->Write(L"\r\ninputCouplintIdB=");
-					sw->Write(((ComboBoxItem^)(this->comboBox13->SelectedItem))->Value());
-					sw->Write(L"\r\ninputRangeIdB=");
-					sw->Write(((ComboBoxItem^)(this->comboBox14->SelectedItem))->Value());
-					sw->Write(L"\r\ninputImpedanceIdB=");
-					sw->Write(((ComboBoxItem^)(this->comboBox15->SelectedItem))->Value());
-					sw->Write(L"\r\n\r\nTrigger #\r\ntriggerOperation=");
-					sw->Write(((ComboBoxItem^)(this->comboBox16->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerSourceIdJ=");
-					sw->Write(((ComboBoxItem^)(this->comboBox17->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerSlopeIdJ=");
-					sw->Write(((ComboBoxItem^)(this->comboBox19->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerLevelJ=");
-					sw->Write(((ComboBoxItem^)(this->comboBox21->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerSourceIdK=");
-					sw->Write(((ComboBoxItem^)(this->comboBox18->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerSlopeIdK=");
-					sw->Write(((ComboBoxItem^)(this->comboBox20->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerLevelK=");
-					sw->Write(((ComboBoxItem^)(this->comboBox22->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerExCouplingId=");
-					sw->Write(((ComboBoxItem^)(this->comboBox23->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerExRange=");
-					sw->Write(((ComboBoxItem^)(this->comboBox24->SelectedItem))->Value());
-					sw->Write(L"\r\ntriggerDelaySec=");
-					sw->Write(this->textBox1->Text);
-					sw->Write(L"\r\ntriggerTimeoutSec=");
-					sw->Write(this->textBox2->Text);
-					sw->Write(L"\r\n\r\nAUX Seting #\r\nAUXMode=0");
-					sw->Write(L"\r\nAUXParameter=0");
-					sw->Write(L"\r\n\r\nAcq Para #\r\npreTriggerSamples=");
-					sw->Write(this->textBox3->Text);
-					sw->Write(L"\r\npostTriggerSamples=");
-					sw->Write(this->textBox4->Text);
-					sw->Write(L"\r\nrecordsPerBuffer=");
-					sw->Write(this->textBox5->Text);
-					sw->Write(L"\r\nbuffersPerImage=");
-					sw->Write(this->textBox7->Text);
-					sw->Write(L"\r\nacqMode=");
-					if (this->checkBox1->Checked)
-					{
-						sw->Write(L"1");
-					} 
-					else
-					{
-						sw->Write(L"0");
-					}
-					sw->Write(L"\r\nsaveName=");
-					sw->Write(this->textBox6->Text);
+					sw->Write(gcnew String(output.c_str()));
 					sw->Flush();
 					sw->Close();
 					fs->Close();
@@ -1298,11 +1271,9 @@ private: System::Windows::Forms::Label^  label34;
 			this->Close();
 		}
 	private: 
-		System::Void FormConfigration1_Load(System::Object^  sender, System::EventArgs^  e) 
-		{
+		System::Void FormConfigration1_Load(System::Object^  sender, System::EventArgs^  e){
 			std::ifstream ifs("resources/cfgdata.dat",std::ios::in);
-			if (!ifs)
-			{
+			if (!ifs){
 				MessageBox::Show(L"System File Does NOT Exist!!",L"Error");
 				this->Close();
 				return;
@@ -1310,12 +1281,9 @@ private: System::Windows::Forms::Label^  label34;
 			int boxIndex=0,itemIndex=-1;
 			std::string tText,tValue;
 			System::Windows::Forms::ComboBox^ tCb;
-			while (!ifs.eof())
-			{
-				if (ifs.good())
-				{
-					if (ifs.peek()=='#')
-					{
+			while (!ifs.eof()){
+				if (ifs.good()){
+					if (ifs.peek()=='#'){
 						ifs.ignore(1);
 						if (itemIndex>0)
 							tCb->SelectedIndex=itemIndex-1;
@@ -1323,8 +1291,7 @@ private: System::Windows::Forms::Label^  label34;
 							break;
 						ifs>>boxIndex>>itemIndex;
 						ifs.ignore(1);
-						switch (boxIndex)
-						{
+						switch (boxIndex){
 						case 1: tCb=this->comboBox1;break;
 						case 2: tCb=this->comboBox2;break;
 						case 3: tCb=this->comboBox3;break;

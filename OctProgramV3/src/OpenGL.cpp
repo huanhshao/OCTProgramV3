@@ -122,10 +122,10 @@ void OpenGL::RenderScene(){
 		list = glGenLists(1);
 		glNewList(list,GL_COMPILE);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0,0.0);		glVertex3fv(PointA);
-		glTexCoord2f(0.0,0.9);		glVertex3fv(PointB);
-		glTexCoord2f(0.5,0.9);		glVertex3fv(PointC);
-		glTexCoord2f(0.5,0.0);		glVertex3fv(PointD);
+		glTexCoord2f(0.5,0.0);		glVertex3fv(PointA);
+		glTexCoord2f(0.5,0.9);		glVertex3fv(PointB);
+		glTexCoord2f(0.0,0.9);		glVertex3fv(PointC);
+		glTexCoord2f(0.0,0.0);		glVertex3fv(PointD);
 		glEnd();
 		glEndList();
 	}

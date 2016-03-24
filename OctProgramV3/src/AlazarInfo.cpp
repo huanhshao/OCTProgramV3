@@ -1,33 +1,25 @@
 #include "stdafx.h"
 #include "AlazarInfo.h"
 
-namespace OCTProgram
-{
-	AlazarInfo::AlazarInfo()
-	{
-
+namespace OCTProgram{
+	AlazarInfo::AlazarInfo(){
 		boardHandle=NULL;
 		bufferArray=NULL;
 		triggerDelaySamples=0;
 		triggerTimeoutClocks=0;
 		acqStop=true;
-		if (!ConfigureBoard("resources/config/default_initial.ini")){
-			cout<<"init alazar failed!"<<endl;
-			assert(false);
-		}
+		/*if (!ConfigureBoard("resources/config/default_initial.ini")){
+		cout<<"init alazar failed!"<<endl;
+		assert(false);
+		}*/
 	}
-	AlazarInfo::~AlazarInfo()
-	{
+	AlazarInfo::~AlazarInfo(){
 		DeleteBuffer();
 	}
-	void AlazarInfo::DeleteBuffer()
-	{
-		if (bufferArray)
-		{
-			for (U32 bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
-			{
-				if (bufferArray[bufferIndex] != NULL)
-				{
+	void AlazarInfo::DeleteBuffer(){
+		if (bufferArray){
+			for (U32 bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++){
+				if (bufferArray[bufferIndex] != NULL){
 #ifdef _WIN32
 					VirtualFree(bufferArray[bufferIndex], 0, MEM_RELEASE);
 #else
@@ -40,8 +32,7 @@ namespace OCTProgram
 			bufferArray=NULL;
 		}
 	}
-	bool AlazarInfo::ConfigureBoard(char* cfgParaDir)
-	{
+	bool AlazarInfo::ConfigureBoard(char* cfgParaDir){
 		DeleteBuffer();
 		if (!GetCfgParam(cfgParaDir))
 			return false;
@@ -51,26 +42,22 @@ namespace OCTProgram
 		RETURN_CODE return_code=CfgBoard4Para();
 		if (return_code!=ApiSuccess)
 			success=false;
-		if (success)
-		{
+		if (success){
 			return_code=GetAcqParam();
 			if (return_code!=ApiSuccess)
 				success=false;
 		}
-		if (success)
-		{
+		if (success){
 			U32 bufferIndex=0;
-			for (bufferIndex = 0; (bufferIndex < BUFFER_COUNT) && (success == true); bufferIndex++)
-			{
+			for (bufferIndex = 0; (bufferIndex < BUFFER_COUNT) && (success == true); bufferIndex++){
 #ifdef _WIN32
 				bufferArray[bufferIndex] = static_cast<U8*>(
-					VirtualAlloc(NULL, bytesPerBuffer*2, MEM_COMMIT, PAGE_READWRITE)
+					VirtualAlloc(NULL, bytesPerBuffer, MEM_COMMIT, PAGE_READWRITE)
 					);
 #else
-				bufferArray[bufferIndex] = static_cast<U8*>(malloc(bytesPerBuffer*2));
+				bufferArray[bufferIndex] = static_cast<U8*>(malloc(bytesPerBuffer));
 #endif
-				if (bufferArray[bufferIndex] == NULL)
-				{
+				if (bufferArray[bufferIndex] == NULL){
 					success = false;
 				}
 			}
@@ -79,114 +66,70 @@ namespace OCTProgram
 		}
 		return success;
 	}
-	bool AlazarInfo::GetCfgParam(char* cfgParaDir)
-	{
-		// some times later, it may changed to json
-		std::ifstream ifs(cfgParaDir,std::ios::in);
-		if (!ifs.is_open())
+	bool AlazarInfo::GetCfgParam(char* cfgParaDir){
+		Json::Value root;
+		Json::Reader reader;
+		std::ifstream fin(cfgParaDir,std::ios::in);
+		if (!fin.is_open())
 			return false;
-		std::string tStr;
-		while (!ifs.eof())
-		{
-			if (ifs.good())
-			{
-				std::getline(ifs,tStr);
-				if (tStr.length()&&tStr.back()=='#')
-				{
-					if (tStr=="System Info #")
-					{
-						ifs.ignore(30,'=');
-						ifs>>BUFFER_COUNT;
-						ifs.ignore(30,'=');
-						ifs>>samplesPerSec;
-						ifs.ignore(30,'=');
-						ifs>>systemId;
-						ifs.ignore(30,'=');
-						ifs>>boardId;
-					}else if (tStr=="Clock #")
-					{
-						ifs.ignore(30,'=');
-						ifs>>clockSourceId;
-						ifs.ignore(30,'=');
-						ifs>>sampleRateId;
-						ifs.ignore(30,'=');
-						ifs>>clockEdgeId;
-						ifs.ignore(30,'=');
-						ifs>>clockDecimation;
-					}else if (tStr=="ChannelInput #")
-					{
-						ifs.ignore(30,'=');
-						ifs>>inputChannel;
-						ifs.ignore(30,'=');
-						ifs>>inputCouplingIdA;
-						ifs.ignore(30,'=');
-						ifs>>inputRangeIdA;
-						ifs.ignore(30,'=');
-						ifs>>inputImpedanceIdA;
-						ifs.ignore(30,'=');
-						ifs>>inputCouplingIdB;
-						ifs.ignore(30,'=');
-						ifs>>inputRangeIdB;
-						ifs.ignore(30,'=');
-						ifs>>inputImpedanceIdB;
-					}else if (tStr=="Trigger #")
-					{
-						ifs.ignore(30,'=');
-						ifs>>triggerOperation;
-						ifs.ignore(30,'=');
-						ifs>>triggerSourceIdJ;
-						ifs.ignore(30,'=');
-						ifs>>triggerSlopeIdJ;
-						ifs.ignore(30,'=');
-						ifs>>triggerLevelJ;
-						ifs.ignore(30,'=');
-						ifs>>triggerSourceIdK;
-						ifs.ignore(30,'=');
-						ifs>>triggerSlopeIdK;
-						ifs.ignore(30,'=');
-						ifs>>triggerLevelK;
-						ifs.ignore(30,'=');
-						ifs>>triggerExCouplingId;
-						ifs.ignore(30,'=');
-						ifs>>triggerExRangeId;
-						ifs.ignore(30,'=');
-						ifs>>triggerDelaySec;
-						ifs.ignore(30,'=');
-						ifs>>triggerTimeoutSec;
-					}else if (tStr=="AUX Seting #")
-					{
-						ifs.ignore(30,'=');
-						ifs>>AUXMode;
-						ifs.ignore(30,'=');
-						ifs>>AUXParameter;
-					}else if (tStr=="Acq Para #")
-					{
-						ifs.ignore(30,'=');
-						ifs>>preTriggerSamples;
-						ifs.ignore(30,'=');
-						ifs>>postTriggerSamples;
-						ifs.ignore(30,'=');
-						ifs>>recordsPerBuffer;
-						ifs.ignore(30,'=');
-						ifs>>buffersPerImage;
-						ifs.ignore(30,'=');
-						ifs>>acqMode;
-						ifs.ignore(30,'=');
-						ifs.getline(saveName,30);
-					}
-				}
-			}
-		}
-		ifs.close();
-		return true;
+		//std::string jstr=string((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
+		reader.parse(fin,root,true);
+		fin.close();
+		//Set function here
+		Json::Value section=root["system"];
+		BUFFER_COUNT=section["buffer_count"].asInt();
+		samplesPerSec=section["samples_per_second"].asDouble();
+		systemId=(U32)(section["system_id"].asInt());
+		boardId=(U32)(section["board_id"].asInt());
+
+		section=root["clock"];
+		clockSourceId=(U32)(section["clock_source"].asInt());
+		sampleRateId=(U32)(section["sample_rate"].asInt());
+		clockEdgeId=(U32)(section["clock_edge"].asInt());
+		clockDecimation=(U32)(section["clock_decimation"].asInt());
+
+		section=root["channel"];
+		inputChannel=(U32)(section["input_channel"].asInt());
+		Json::Value channels=section["channel_A"];
+		inputCouplingIdA=(U32)(channels["input_coupling"].asInt());
+		inputRangeIdA=(U32)(channels["input_range"].asInt());
+		inputImpedanceIdA=(U32)(channels["input_impedance"].asInt());
+		channels=section["channel_B"];
+		inputCouplingIdB=(U32)(channels["input_coupling"].asInt());
+		inputRangeIdB=(U32)(channels["input_range"].asInt());
+		inputImpedanceIdB=(U32)(channels["input_impedance"].asInt());
+
+		section=root["trigger"];
+		triggerOperation=(U32)(section["trigger_operation"].asInt());
+		Json::Value engines=section["trigger_engine_J"];
+		triggerSourceIdJ=(U32)(engines["trigger_source"].asInt());
+		triggerSlopeIdJ=(U32)(engines["trigger_slope"].asInt());
+		triggerLevelJ=(U32)(engines["trigger_level"].asInt());
+		engines=section["trigger_engine_K"];
+		triggerSourceIdK=(U32)(engines["trigger_source"].asInt());
+		triggerSlopeIdK=(U32)(engines["trigger_slope"].asInt());
+		triggerLevelK=(U32)(engines["trigger_level"].asInt());
+		triggerExCouplingId=(U32)(section["trigger_ex_coupling"].asInt());
+		triggerExRangeId=(U32)(section["trigger_ex_range"].asInt());
+		triggerDelaySec=section["trigger_delay"].asDouble();
+		triggerTimeoutSec=section["trigger_timeout"].asDouble();
+
+		section=root["AUX"];
+		AUXMode=(U32)(section["mode"].asInt());
+		AUXParameter=(U32)(section["parameters"].asInt());
+
+		section=root["acqusition_params"];
+		preTriggerSamples=(U32)(section["pre_trigger_samples"].asInt());
+		postTriggerSamples=(U32)(section["post_trigger_samples"].asInt());
+		recordsPerBuffer=(U32)(section["record_per_buffer"].asInt());
+		buffersPerImage=(U32)(section["buffers_per_image"].asInt());
 	}
 	void AlazarInfo::SetChannalMask(int channalID)
 	{
 		inputChannel=channalID;
 		GetAcqParam();
 	}
-	RETURN_CODE AlazarInfo::CfgBoard4Para()
-	{
+	RETURN_CODE AlazarInfo::CfgBoard4Para(){
 		//Select clock Parameters as required to generate the sample rate.
 		RETURN_CODE retCode = AlazarSetCaptureClock(
 			boardHandle,
@@ -195,8 +138,7 @@ namespace OCTProgram
 			clockEdgeId,
 			clockDecimation
 			);
-		if (retCode != ApiSuccess)
-		{
+		if (retCode != ApiSuccess){
 			return retCode;
 		}
 		//Select input parameters as required
@@ -207,8 +149,7 @@ namespace OCTProgram
 			inputRangeIdA,
 			inputImpedanceIdA
 			);
-		if (retCode != ApiSuccess)
-		{
+		if (retCode != ApiSuccess){
 			return retCode;
 		}
 		retCode=AlazarSetBWLimit(
@@ -216,8 +157,7 @@ namespace OCTProgram
 			CHANNEL_A,
 			0				//0 = disable, 1 = enable
 			);
-		if (retCode != ApiSuccess)
-		{
+		if (retCode != ApiSuccess){
 			return retCode;
 		}
 		retCode = AlazarInputControl(
@@ -284,10 +224,8 @@ namespace OCTProgram
 		}
 		return retCode;
 	}
-	RETURN_CODE AlazarInfo::GetAcqParam()
-	{
-		switch (inputChannel)
-		{
+	RETURN_CODE AlazarInfo::GetAcqParam(){
+		switch (inputChannel){
 		case CHANNEL_A:
 		case CHANNEL_B:
 			channelCount=1;break;
@@ -304,8 +242,7 @@ namespace OCTProgram
 			&maxSamplesPerChannel,
 			&bitsPerSample
 			);
-		if (retCode != ApiSuccess)
-		{
+		if (retCode != ApiSuccess){
 			return retCode;
 		}
 		// Calculate the size of each DMA buffer in bytes
@@ -315,20 +252,16 @@ namespace OCTProgram
 		bytesPerBuffer = bytesPerRecord * recordsPerBuffer * channelCount;
 		return retCode;
 	}
-	bool AlazarInfo::IsAcqStoped()
-	{
+	bool AlazarInfo::IsAcqStoped(){
 		return acqStop;
 	}
-	void AlazarInfo::StopAcq()
-	{
+	void AlazarInfo::StopAcq(){
 		acqStop=true;
 	}
-	void AlazarInfo::BeginAcq()
-	{
+	void AlazarInfo::BeginAcq(){
 		acqStop=false;
 	}
-	void AlazarInfo::GetImageSize(int* w,int* h)
-	{
+	void AlazarInfo::GetImageSize(int* w,int* h){
 		*w=1024;//w must be 1024
 		*h=recordsPerBuffer;
 	}
