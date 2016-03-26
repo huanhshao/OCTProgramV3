@@ -1207,49 +1207,49 @@ private: System::Windows::Forms::Label^  label34;
 					//begin write
 					Json::Value root;
 					Json::Value sys;
-					sys["buffer_count"]=((ComboBoxItem^)(this->comboBox1->SelectedItem))->Value();
-					sys["samples_per_second"]=((ComboBoxItem^)(this->comboBox2->SelectedItem))->Value();
-					sys["system_id"]=((ComboBoxItem^)(this->comboBox3->SelectedItem))->Value();
-					sys["board_id"]=((ComboBoxItem^)(this->comboBox4->SelectedItem))->Value();
+					sys["buffer_count"]=int::Parse(((ComboBoxItem^)(this->comboBox1->SelectedItem))->Value());
+					sys["samples_per_second"]=double::Parse(((ComboBoxItem^)(this->comboBox2->SelectedItem))->Value());
+					sys["system_id"]=int::Parse(((ComboBoxItem^)(this->comboBox3->SelectedItem))->Value());
+					sys["board_id"]=int::Parse(((ComboBoxItem^)(this->comboBox4->SelectedItem))->Value());
 					root["system"]=sys;
 					Json::Value clk;
-					clk["clock_source"]=((ComboBoxItem^)(this->comboBox5->SelectedItem))->Value();
-					clk["sample_rate"]=((ComboBoxItem^)(this->comboBox6->SelectedItem))->Value();
-					clk["clock_edge"]=((ComboBoxItem^)(this->comboBox7->SelectedItem))->Value();
-					clk["clock_decimation"]=((ComboBoxItem^)(this->comboBox8->SelectedItem))->Value();
+					clk["clock_source"]=int::Parse(((ComboBoxItem^)(this->comboBox5->SelectedItem))->Value());
+					clk["sample_rate"]=int::Parse(((ComboBoxItem^)(this->comboBox6->SelectedItem))->Value());
+					clk["clock_edge"]=int::Parse(((ComboBoxItem^)(this->comboBox7->SelectedItem))->Value());
+					clk["clock_decimation"]=int::Parse(((ComboBoxItem^)(this->comboBox8->SelectedItem))->Value());
 					root["clock"]=clk;
 					Json::Value chnl;
-					chnl["input_channel"]=((ComboBoxItem^)(this->comboBox9->SelectedItem))->Value();
+					chnl["input_channel"]=int::Parse(((ComboBoxItem^)(this->comboBox9->SelectedItem))->Value());
 					Json::Value chA;
-					chA["input_coupling"]=((ComboBoxItem^)(this->comboBox10->SelectedItem))->Value();
-					chA["input_range"]=((ComboBoxItem^)(this->comboBox11->SelectedItem))->Value();
-					chA["input_impedance"]=((ComboBoxItem^)(this->comboBox12->SelectedItem))->Value();
+					chA["input_coupling"]=int::Parse(((ComboBoxItem^)(this->comboBox10->SelectedItem))->Value());
+					chA["input_range"]=int::Parse(((ComboBoxItem^)(this->comboBox11->SelectedItem))->Value());
+					chA["input_impedance"]=int::Parse(((ComboBoxItem^)(this->comboBox12->SelectedItem))->Value());
 					chnl["channel_A"]=chA;
 					Json::Value chB;
-					chB["input_coupling"]=((ComboBoxItem^)(this->comboBox13->SelectedItem))->Value();
-					chB["input_range"]=((ComboBoxItem^)(this->comboBox14->SelectedItem))->Value();
-					chB["input_impedance"]=((ComboBoxItem^)(this->comboBox15->SelectedItem))->Value();
+					chB["input_coupling"]=int::Parse(((ComboBoxItem^)(this->comboBox13->SelectedItem))->Value());
+					chB["input_range"]=int::Parse(((ComboBoxItem^)(this->comboBox14->SelectedItem))->Value());
+					chB["input_impedance"]=int::Parse(((ComboBoxItem^)(this->comboBox15->SelectedItem))->Value());
 					chnl["channel_B"]=chB;
 					root["channel"]=chnl;
 					Json::Value trg;
-					trg["trigger_operation"]=((ComboBoxItem^)(this->comboBox16->SelectedItem))->Value();
+					trg["trigger_operation"]=int::Parse(((ComboBoxItem^)(this->comboBox16->SelectedItem))->Value());
 					Json::Value engine_J,engine_K;
-					engine_J["trigger_source"]=((ComboBoxItem^)(this->comboBox17->SelectedItem))->Value();
-					engine_J["trigger_slope"]=((ComboBoxItem^)(this->comboBox19->SelectedItem))->Value();
-					engine_J["trigger_level"]=((ComboBoxItem^)(this->comboBox21->SelectedItem))->Value();
+					engine_J["trigger_source"]=int::Parse(((ComboBoxItem^)(this->comboBox17->SelectedItem))->Value());
+					engine_J["trigger_slope"]=int::Parse(((ComboBoxItem^)(this->comboBox19->SelectedItem))->Value());
+					engine_J["trigger_level"]=int::Parse(((ComboBoxItem^)(this->comboBox21->SelectedItem))->Value());
 					trg["trigger_engine_J"]=engine_J;
-					engine_K["trigger_source"]=((ComboBoxItem^)(this->comboBox18->SelectedItem))->Value();
-					engine_K["trigger_slope"]=((ComboBoxItem^)(this->comboBox20->SelectedItem))->Value();
-					engine_K["trigger_level"]=((ComboBoxItem^)(this->comboBox22->SelectedItem))->Value();
+					engine_K["trigger_source"]=int::Parse(((ComboBoxItem^)(this->comboBox18->SelectedItem))->Value());
+					engine_K["trigger_slope"]=int::Parse(((ComboBoxItem^)(this->comboBox20->SelectedItem))->Value());
+					engine_K["trigger_level"]=int::Parse(((ComboBoxItem^)(this->comboBox22->SelectedItem))->Value());
 					trg["trigger_engine_K"]=engine_K;
-					trg["trigger_ex_coupling"]=((ComboBoxItem^)(this->comboBox23->SelectedItem))->Value();
-					trg["trigger_ex_range"]=((ComboBoxItem^)(this->comboBox24->SelectedItem))->Value();
+					trg["trigger_ex_coupling"]=int::Parse(((ComboBoxItem^)(this->comboBox23->SelectedItem))->Value());
+					trg["trigger_ex_range"]=int::Parse(((ComboBoxItem^)(this->comboBox24->SelectedItem))->Value());
 					trg["trigger_delay"]=double::Parse(this->textBox1->Text);
 					trg["trigger_timeout"]=double::Parse(this->textBox2->Text);
 					root["trigger"]=trg;
 					Json::Value aux;
-					aux["mode"]="0";
-					aux["parameters"]="0";
+					aux["mode"]=0;
+					aux["parameters"]=0;
 					root["AUX"]=aux;
 					Json::Value acq;
 					acq["pre_trigger_samples"]=int::Parse(this->textBox3->Text);
@@ -1257,7 +1257,7 @@ private: System::Windows::Forms::Label^  label34;
 					acq["record_per_buffer"]=int::Parse(this->textBox5->Text);
 					acq["buffers_per_image"]=int::Parse(this->textBox7->Text);
 					root["acqusition_params"]=acq;
-					Json::FastWriter writer;
+					Json::StyledWriter writer;
 					std::string output=writer.write(root);
 					sw=gcnew StreamWriter(fs);
 					sw->Write(gcnew String(output.c_str()));
@@ -1337,25 +1337,20 @@ private: System::Windows::Forms::Label^  label34;
 		}
 	private:
 		System::Void comboBox9_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-			if ((this->comboBox9->SelectedIndex+1)&1)
-			{
+			if ((this->comboBox9->SelectedIndex+1)&1){
 				this->groupBox3->Enabled=true;
-			}else
-			{
+			}else{
 				this->groupBox3->Enabled=false;
 			}
-			if ((this->comboBox9->SelectedIndex+1)&2)
-			{
+			if ((this->comboBox9->SelectedIndex+1)&2){
 				this->groupBox4->Enabled=true;
-			}else
-			{
+			}else{
 				this->groupBox4->Enabled=false;
 			}
 		}
 	private:
 		System::Void checkBox2_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-			if (this->checkBox2->Checked)
-			{
+			if (this->checkBox2->Checked){
 				this->textBox3->ReadOnly=true;
 				this->textBox4->ReadOnly=true;
 				this->textBox5->ReadOnly=true;
@@ -1363,8 +1358,7 @@ private: System::Windows::Forms::Label^  label34;
 				this->textBox4->Text=L"1024";
 				this->textBox5->Text=L"100";
 			} 
-			else
-			{
+			else{
 				MessageBox::Show(L"请勿随意更改相关数据!",L"提示");
 				this->textBox3->ReadOnly=false;
 				this->textBox4->ReadOnly=false;
@@ -1373,12 +1367,10 @@ private: System::Windows::Forms::Label^  label34;
 		}
 	private:
 		System::Void checkBox1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-			if (this->checkBox1->Checked)
-			{
+			if (this->checkBox1->Checked){
 				this->textBox6->ReadOnly=false;
 			} 
-			else
-			{
+			else{
 				this->textBox6->ReadOnly=true;
 			}
 		}

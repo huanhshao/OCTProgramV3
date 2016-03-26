@@ -13,7 +13,7 @@ namespace OCTProgram
 		ComboBoxItem(String^ text,String^ value);
 		~ComboBoxItem();
 		String^ Text();
-		string Value();
+		String^ Value();
 		virtual String^ ToString() override;
 	};
 }

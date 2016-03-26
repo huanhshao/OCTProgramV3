@@ -10,8 +10,8 @@ namespace OCTProgram
 	String^ ComboBoxItem::Text(){
 		return this->m_Text;
 	}
-	std::string ComboBoxItem::Value(){
-		return string((char*)(void*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(this->m_Value));
+	String^ ComboBoxItem::Value(){
+		return this->m_Value;
 	}
 	String^ ComboBoxItem::ToString(){
 		return this->m_Text;
