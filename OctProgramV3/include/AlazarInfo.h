@@ -29,7 +29,6 @@ namespace OCTProgram
 	protected:
 		U32 systemId;
 		U32 boardId;
-		double samplesPerSec;
 
 		U32 clockSourceId;
 		U32 sampleRateId;
@@ -52,8 +51,6 @@ namespace OCTProgram
 		U32 triggerLevelK;
 		U32 triggerExCouplingId;
 		U32 triggerExRangeId;
-		double triggerDelaySec;
-		double triggerTimeoutSec;
 
 		U32 AUXMode;
 		U32 AUXParameter;

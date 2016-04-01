@@ -48,7 +48,7 @@ unsigned __stdcall ACQDATA(void* lpParam)
 		U8* pBuffer=nullptr;
 		int bufferIndex=0;
         ///////////////////////Acq Begin///////////////////////////
-        alazar->SetChannalMask(1);			//CHANNAL_A = 1
+        alazar->SetChannalMask(2);			//CHANNAL_A = 1
 		//alazar->SetChannalMask(3);				//CHANNAL_A | B = 3
         FILE* fpData = fopen("../../../data.bin", "wb");
         char* strpro = "OCT Data Created By OCTProgram V2.1. Image Size:";
@@ -97,41 +97,55 @@ unsigned __stdcall ACQDATA(void* lpParam)
         DWORD timeout_ms = 5000;	//Timeout Long Enough
         bufferIndex = 0;
         float* tbuffer = new float[1024 * alazar->recordsPerBuffer];
+		int buffersCompleted=0;
         while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0&&success){
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
             retCode = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
-            if (retCode != ApiSuccess) success = false;
+            if (retCode != ApiSuccess){
+				success = false;
+				cout<<"error:"<<AlazarErrorToText(retCode)<<endl;
+			}
+			printf("Completed %d buffers,bufferIndex %u\r", buffersCompleted++,bufferIndex);
             if (success){
-				if (acq_time==0){
-					U8* pRecord = pBuffer;
-					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
-					    for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++){
-					        size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
-					        if (bytesWritten != alazar->bytesPerRecord) success = false;
-					        pRecord += alazar->samplesPerRecord;
-					        savedBuffer++;
-					    }
-					}
-				}
-				for (int j = 0; j<1024; j++){
-					for (unsigned int i = 0; i<alazar->recordsPerBuffer; i++){
-                        tbuffer[i*1024+j]=static_cast<float>(pBuffer[i*alazar->bytesPerRecord+j]-127);
-					}
-                }
-                if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0){
-                    cgl->SendDataToGPU(tbuffer, 1024 * alazar->recordsPerBuffer);
-                    WaitForSingleObject(_HMutex, INFINITE);
-                    cgl->EmptyToFull();
-                    ReleaseSemaphore(_HFullGPUMem, 1, NULL);
-                    ReleaseMutex(_HMutex);
-                }
+				//if (acq_time==0){
+				//	U8* pRecord = pBuffer;
+				//	for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
+				//	    for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++){
+				//	        size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
+				//	        if (bytesWritten != alazar->bytesPerRecord) success = false;
+				//	        pRecord += alazar->samplesPerRecord;
+				//	        savedBuffer++;
+				//	    }
+				//	}
+				//}
+				//for (int j = 0; j<1024; j++){
+				//	for (unsigned int i = 0; i<alazar->recordsPerBuffer; i++){
+				//		if (j>alazar->bytesPerRecord){
+				//			tbuffer[i*1024+j]=0;
+				//		}
+				//		else{
+				//			tbuffer[i*1024+j]=static_cast<float>(pBuffer[i*alazar->bytesPerRecord+j]-127);
+				//	
+				//		}
+				//	}
+				//}
+                //if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0){
+                //    cgl->SendDataToGPU(tbuffer, 1024 * alazar->recordsPerBuffer);
+                //    WaitForSingleObject(_HMutex, INFINITE);
+                //    cgl->EmptyToFull();
+                //    ReleaseSemaphore(_HFullGPUMem, 1, NULL);
+                //    ReleaseMutex(_HMutex);
+                //}
                 bufferIndex++;
             }
             if (success)
             {
                 retCode = AlazarPostAsyncBuffer(alazar->boardHandle, pBuffer, alazar->bytesPerBuffer);
-                if (retCode != ApiSuccess) success = false;
+                if (retCode != ApiSuccess){
+					success = false;
+					cout<<"error:"<<AlazarErrorToText(retCode)<<endl;
+				}
             }
         }
         // Abort the acquisition

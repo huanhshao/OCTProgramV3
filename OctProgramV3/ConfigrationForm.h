@@ -226,6 +226,11 @@ private: System::Windows::Forms::Label^  label34;
 				 this->label1 = (gcnew System::Windows::Forms::Label());
 				 this->tabControl1 = (gcnew System::Windows::Forms::TabControl());
 				 this->Calib = (gcnew System::Windows::Forms::TabPage());
+				 this->textBox12 = (gcnew System::Windows::Forms::TextBox());
+				 this->textBox11 = (gcnew System::Windows::Forms::TextBox());
+				 this->toolStrip1 = (gcnew System::Windows::Forms::ToolStrip());
+				 this->label35 = (gcnew System::Windows::Forms::Label());
+				 this->label34 = (gcnew System::Windows::Forms::Label());
 				 this->textBox10 = (gcnew System::Windows::Forms::TextBox());
 				 this->textBox9 = (gcnew System::Windows::Forms::TextBox());
 				 this->radioButton2 = (gcnew System::Windows::Forms::RadioButton());
@@ -233,11 +238,6 @@ private: System::Windows::Forms::Label^  label34;
 				 this->textBox8 = (gcnew System::Windows::Forms::TextBox());
 				 this->label33 = (gcnew System::Windows::Forms::Label());
 				 this->label32 = (gcnew System::Windows::Forms::Label());
-				 this->label34 = (gcnew System::Windows::Forms::Label());
-				 this->label35 = (gcnew System::Windows::Forms::Label());
-				 this->toolStrip1 = (gcnew System::Windows::Forms::ToolStrip());
-				 this->textBox11 = (gcnew System::Windows::Forms::TextBox());
-				 this->textBox12 = (gcnew System::Windows::Forms::TextBox());
 				 this->tabPage5->SuspendLayout();
 				 this->groupBox7->SuspendLayout();
 				 this->tabPage3->SuspendLayout();
@@ -859,6 +859,7 @@ private: System::Windows::Forms::Label^  label34;
 				 this->comboBox5->Name = L"comboBox5";
 				 this->comboBox5->Size = System::Drawing::Size(83, 20);
 				 this->comboBox5->TabIndex = 8;
+				 this->comboBox5->SelectedIndexChanged += gcnew System::EventHandler(this, &FormConfigration1::comboBox5_SelectedIndexChanged);
 				 // 
 				 // label5
 				 // 
@@ -1040,6 +1041,48 @@ private: System::Windows::Forms::Label^  label34;
 				 this->Calib->Text = L"Calib";
 				 this->Calib->UseVisualStyleBackColor = true;
 				 // 
+				 // textBox12
+				 // 
+				 this->textBox12->Location = System::Drawing::Point(135, 61);
+				 this->textBox12->Name = L"textBox12";
+				 this->textBox12->Size = System::Drawing::Size(86, 21);
+				 this->textBox12->TabIndex = 11;
+				 this->textBox12->Text = L"5900";
+				 // 
+				 // textBox11
+				 // 
+				 this->textBox11->Location = System::Drawing::Point(135, 34);
+				 this->textBox11->Name = L"textBox11";
+				 this->textBox11->Size = System::Drawing::Size(86, 21);
+				 this->textBox11->TabIndex = 10;
+				 this->textBox11->Text = L"2400";
+				 // 
+				 // toolStrip1
+				 // 
+				 this->toolStrip1->Location = System::Drawing::Point(3, 3);
+				 this->toolStrip1->Name = L"toolStrip1";
+				 this->toolStrip1->Size = System::Drawing::Size(324, 25);
+				 this->toolStrip1->TabIndex = 9;
+				 this->toolStrip1->Text = L"toolStrip1";
+				 // 
+				 // label35
+				 // 
+				 this->label35->AutoSize = true;
+				 this->label35->Location = System::Drawing::Point(54, 61);
+				 this->label35->Name = L"label35";
+				 this->label35->Size = System::Drawing::Size(29, 12);
+				 this->label35->TabIndex = 8;
+				 this->label35->Text = L"End:";
+				 // 
+				 // label34
+				 // 
+				 this->label34->AutoSize = true;
+				 this->label34->Location = System::Drawing::Point(54, 35);
+				 this->label34->Name = L"label34";
+				 this->label34->Size = System::Drawing::Size(41, 12);
+				 this->label34->TabIndex = 7;
+				 this->label34->Text = L"Start:";
+				 // 
 				 // textBox10
 				 // 
 				 this->textBox10->Location = System::Drawing::Point(135, 166);
@@ -1101,48 +1144,6 @@ private: System::Windows::Forms::Label^  label34;
 				 this->label32->Size = System::Drawing::Size(77, 12);
 				 this->label32->TabIndex = 0;
 				 this->label32->Text = L"NumsOfAscan:";
-				 // 
-				 // label34
-				 // 
-				 this->label34->AutoSize = true;
-				 this->label34->Location = System::Drawing::Point(54, 35);
-				 this->label34->Name = L"label34";
-				 this->label34->Size = System::Drawing::Size(41, 12);
-				 this->label34->TabIndex = 7;
-				 this->label34->Text = L"Start:";
-				 // 
-				 // label35
-				 // 
-				 this->label35->AutoSize = true;
-				 this->label35->Location = System::Drawing::Point(54, 61);
-				 this->label35->Name = L"label35";
-				 this->label35->Size = System::Drawing::Size(29, 12);
-				 this->label35->TabIndex = 8;
-				 this->label35->Text = L"End:";
-				 // 
-				 // toolStrip1
-				 // 
-				 this->toolStrip1->Location = System::Drawing::Point(3, 3);
-				 this->toolStrip1->Name = L"toolStrip1";
-				 this->toolStrip1->Size = System::Drawing::Size(324, 25);
-				 this->toolStrip1->TabIndex = 9;
-				 this->toolStrip1->Text = L"toolStrip1";
-				 // 
-				 // textBox11
-				 // 
-				 this->textBox11->Location = System::Drawing::Point(135, 34);
-				 this->textBox11->Name = L"textBox11";
-				 this->textBox11->Size = System::Drawing::Size(86, 21);
-				 this->textBox11->TabIndex = 10;
-				 this->textBox11->Text = L"2400";
-				 // 
-				 // textBox12
-				 // 
-				 this->textBox12->Location = System::Drawing::Point(135, 61);
-				 this->textBox12->Name = L"textBox12";
-				 this->textBox12->Size = System::Drawing::Size(86, 21);
-				 this->textBox12->TabIndex = 11;
-				 this->textBox12->Text = L"5900";
 				 // 
 				 // FormConfigration1
 				 // 
@@ -1208,7 +1209,7 @@ private: System::Windows::Forms::Label^  label34;
 					Json::Value root;
 					Json::Value sys;
 					sys["buffer_count"]=int::Parse(((ComboBoxItem^)(this->comboBox1->SelectedItem))->Value());
-					sys["samples_per_second"]=double::Parse(((ComboBoxItem^)(this->comboBox2->SelectedItem))->Value());
+					//sys["samples_per_second"]=double::Parse(((ComboBoxItem^)(this->comboBox2->SelectedItem))->Value());
 					sys["system_id"]=int::Parse(((ComboBoxItem^)(this->comboBox3->SelectedItem))->Value());
 					sys["board_id"]=int::Parse(((ComboBoxItem^)(this->comboBox4->SelectedItem))->Value());
 					root["system"]=sys;
@@ -1244,8 +1245,8 @@ private: System::Windows::Forms::Label^  label34;
 					trg["trigger_engine_K"]=engine_K;
 					trg["trigger_ex_coupling"]=int::Parse(((ComboBoxItem^)(this->comboBox23->SelectedItem))->Value());
 					trg["trigger_ex_range"]=int::Parse(((ComboBoxItem^)(this->comboBox24->SelectedItem))->Value());
-					trg["trigger_delay"]=double::Parse(this->textBox1->Text);
-					trg["trigger_timeout"]=double::Parse(this->textBox2->Text);
+					trg["trigger_delay"]=int::Parse(this->textBox1->Text);
+					//trg["trigger_timeout"]=double::Parse(this->textBox2->Text);
 					root["trigger"]=trg;
 					Json::Value aux;
 					aux["mode"]=0;
@@ -1334,6 +1335,8 @@ private: System::Windows::Forms::Label^  label34;
 			this->textBox2->Text=L"0";
 			this->groupBox3->Enabled=false;
 			this->groupBox4->Enabled=true;
+			this->comboBox2->Enabled=false; //disable sample rate select
+			this->textBox2->Enabled=false;
 		}
 	private:
 		System::Void comboBox9_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
@@ -1374,5 +1377,11 @@ private: System::Windows::Forms::Label^  label34;
 				this->textBox6->ReadOnly=true;
 			}
 		}
-	};
+	private: System::Void comboBox5_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+				 if(this->comboBox5->SelectedIndex==1){
+					 this->comboBox6->SelectedIndex=3;
+					 this->comboBox6->Enabled=false;
+				 }
+			 }
+};
 }

@@ -8,7 +8,7 @@ namespace OCTProgram{
 		triggerDelaySamples=0;
 		triggerTimeoutClocks=0;
 		acqStop=true;
-		if (!ConfigureBoard("resources/config/default.ini")){
+		if (!ConfigureBoard("resources/config/default_initial.ini")){
 			cout<<"init alazar failed!"<<endl;
 			assert(false);
 		}
@@ -78,7 +78,6 @@ namespace OCTProgram{
 		//Set function here
 		Json::Value section=root["system"];
 		BUFFER_COUNT=section["buffer_count"].asInt();
-		samplesPerSec=section["samples_per_second"].asDouble();
 		systemId=(U32)(section["system_id"].asInt());
 		boardId=(U32)(section["board_id"].asInt());
 
@@ -111,9 +110,8 @@ namespace OCTProgram{
 		triggerLevelK=(U32)(engines["trigger_level"].asInt());
 		triggerExCouplingId=(U32)(section["trigger_ex_coupling"].asInt());
 		triggerExRangeId=(U32)(section["trigger_ex_range"].asInt());
-		triggerDelaySec=section["trigger_delay"].asDouble();
-		triggerTimeoutSec=section["trigger_timeout"].asDouble();
-
+		triggerDelaySamples=section["trigger_delay"].asInt();
+		//triggerTimeoutSec=section["trigger_timeout"].asDouble();
 		section=root["AUX"];
 		AUXMode=(U32)(section["mode"].asInt());
 		AUXParameter=(U32)(section["parameters"].asInt());
@@ -205,13 +203,12 @@ namespace OCTProgram{
 		{
 			return retCode;
 		}
-		triggerDelaySamples=static_cast<U32>(triggerDelaySec*samplesPerSec+0.5);
 		retCode=AlazarSetTriggerDelay(boardHandle, triggerDelaySamples);
 		if (retCode != ApiSuccess)
 		{
 			return retCode;
 		}
-		triggerTimeoutClocks=static_cast<U32>(triggerTimeoutSec / 10.e-6 + 0.5);
+		triggerTimeoutClocks=0;
 		retCode=AlazarSetTriggerTimeOut(boardHandle,triggerTimeoutClocks);
 		if (retCode != ApiSuccess)
 		{
