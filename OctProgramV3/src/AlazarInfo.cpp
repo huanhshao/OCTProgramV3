@@ -8,7 +8,7 @@ namespace OCTProgram{
 		triggerDelaySamples=0;
 		triggerTimeoutClocks=0;
 		acqStop=true;
-		if (!ConfigureBoard("resources/config/default.ini")){
+		if (!ConfigureBoard("resources/config/default_initial.ini")){
 		cout<<"init alazar failed!"<<endl;
 		assert(false);
 		}
