@@ -277,6 +277,7 @@ unsigned __stdcall ACQDATA(void* lpParam){
 			}
             if (success){
 				//if (acq_time%100==0&&acq_time<1001){
+				
 				if (acq_time==0){
 					U8* pRecord = pBuffer;
 					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
@@ -289,23 +290,23 @@ unsigned __stdcall ACQDATA(void* lpParam){
 					}
 				}
 				acq_time++;
-				for (int j = 0; j<1024; j++){
-					int line_id=calib_param[j];
-					if (line_id<0){
+				if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0){
+					for (int j = 0; j<1024; j++){
+						int line_id=calib_param[j];
+						if (line_id<0){
+							for (int i = 0; i<alazar->recordsPerBuffer; i++)
+								tbuffer[i*1024+j]=0;
+							continue;
+						}
+						float avg=0;
 						for (int i = 0; i<alazar->recordsPerBuffer; i++)
-							tbuffer[i*1024+j]=0;
-						continue;
+							avg+=pBuffer[i*alazar->bytesPerRecord + line_id];
+						avg/=alazar->recordsPerBuffer;
+						for (int i = 0; i<alazar->recordsPerBuffer; i++){
+							//tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
+							tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
+						}
 					}
-					float avg=0;
-					for (int i = 0; i<alazar->recordsPerBuffer; i++)
-						avg+=pBuffer[i*alazar->bytesPerRecord + line_id];
-					avg/=alazar->recordsPerBuffer;
-					for (int i = 0; i<alazar->recordsPerBuffer; i++){
-						//tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
-                        tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
-					}
-                }
-                if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0){
                     cgl->SendDataToGPU(tbuffer, 1024 * alazar->recordsPerBuffer);
                     WaitForSingleObject(_HMutex, INFINITE);
                     cgl->EmptyToFull();
