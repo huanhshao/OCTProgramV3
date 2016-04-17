@@ -49,7 +49,7 @@ namespace OCTProgram{
 		}
 	}
 	bool AdvInfo::StartWaveOut(){
-		return true;
+		//return true;
 		if (globle_mem_out_handle_==NULL||globle_mem_out_==nullptr){
 			cout<<"ERROR!!Can't Find Data Buffer!!"<<endl;
 			return false;
@@ -90,7 +90,7 @@ namespace OCTProgram{
 	void AdvInfo::SetSignal(double mag,double off,int pd,int channel){
 		switch(channel){
 		case 0:
-			wave_channel_x_.Set(WAVE_TRIANGLE,mag,off,pd);
+			wave_channel_x_.Set(WAVE_TRIANGLE,mag,off,pd*2);
 			break;
 		case 1:
 			wave_channel_y_.Set(WAVE_TRIANGLE,mag,off,pd);

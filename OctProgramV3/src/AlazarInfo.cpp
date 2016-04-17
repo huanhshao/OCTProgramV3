@@ -266,7 +266,7 @@ namespace OCTProgram{
 		acqStop=false;
 	}
 	void AlazarInfo::GetImageSize(int* w,int* h){
-		*w=1024;//w must be 1024
+		*w=samplesPerRecord;
 		*h=recordsPerBuffer;
 	}
 }

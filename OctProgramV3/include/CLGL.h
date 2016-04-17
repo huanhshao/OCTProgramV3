@@ -56,12 +56,13 @@ public:
 	void WaitEvent(int count,cl_event* waitlist);
 	void AcquireTex();
 	void ReleaseTex();
-	cl_mem GenMem(int n,int m);
-	void WriteBuffer(float* buffer,memStat* pms,size_t bufferLength);
+	cl_mem GenMem(int n,int m,size_t sample_byte=sizeof(cl_float));
+	void WriteBuffer(unsigned char* buffer,memStat* pms,size_t bufferLength);
 	void ReleaseMem(cl_mem mem);
 	void EnqueueCalHist(int* hst,int n,int m);
 	void SetHstParam(double min,double max,double lastMin,double lastMax);
 	void BindGLTexture(GLuint front,GLuint back);
+	void WriteCalib(vector<int>&calib_indexs);
 private:
 	int InitCL();
 	int InitCLFromGL();		//Must use after a GL texture created
@@ -83,6 +84,8 @@ private:
 	cl_kernel hist;
 	cl_float k;
 	cl_float a;
+	//calib param
+	cl_mem cl_calib_mem;
 };
 class OpenCLGLClass
 {
@@ -91,7 +94,7 @@ public:
 	~OpenCLGLClass();
 	void PrepareResources(int n,int m);
 	void Initialize(HDC hdc,int n,int m);
-	void SendDataToGPU(float* buffer,size_t bufferLength);
+	void SendDataToGPU(unsigned char* buffer);
 	void CalFFT();
 	void SwapTexBuffer();
 	void SetGLContext(int i);
@@ -105,6 +108,9 @@ public:
 	void SetColorLevels(double a,double b);
 	void FullToEmpty();
     void EmptyToFull();
+	void WriteCalibIndex(vector<int>& calib_index){
+		mcl.WriteCalib(calib_index);
+	}
 private:
 	void ReleaseMem();
 	void ClearQueue(std::queue<memStat*> mem_queue);

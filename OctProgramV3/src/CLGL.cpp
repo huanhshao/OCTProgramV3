@@ -41,20 +41,19 @@ void OpenCLGLClass::PrepareResources(int n,int m){
 		ClearQueue(memQueueFu);
 		buffer_mems_.resize(BUFFERCOUNT);
 		for (int i=0;i<buffer_mems_.size();i++){
-			buffer_mems_[i].memName=mcl.GenMem(n,m);
+			buffer_mems_[i].memName=mcl.GenMem(n_,m_,sizeof(cl_uchar));
 			memQueueEm.push(&buffer_mems_[i]);
 		}
 		mcl.ReleaseTex();
-		mgl.ReshapeTex(n,m);
+		mgl.ReshapeTex(1024,m);
 		mcl.BindGLTexture(mgl.GetFrontTex(),mgl.GetBackTex());
 		mcl.AcquireTex();
 	}
 }
-void OpenCLGLClass::SendDataToGPU(float* buffer,size_t bufferLength)
-{
+void OpenCLGLClass::SendDataToGPU(unsigned char* buffer){
 	if (!memQueueEm.size())
 		return;
-	mcl.WriteBuffer(buffer,memQueueEm.front(),bufferLength);
+	mcl.WriteBuffer(buffer,memQueueEm.front(),n_*m_);
 }
 void OpenCLGLClass::EmptyToFull(){
     memQueueFu.push(memQueueEm.front());

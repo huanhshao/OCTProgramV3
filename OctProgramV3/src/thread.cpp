@@ -199,6 +199,8 @@ unsigned __stdcall ACQDATA(void* lpParam){
 			ofs.close();
         }
         fclose(fpData);
+		assert(calib_param.size()==1024);
+		cgl->WriteCalibIndex(calib_param);
         if (WaitForSingleObject(acq_param->begin_acquisition, 0) != WAIT_OBJECT_0){
 			WaitForSingleObject(_HMutex, INFINITE);
 			ResetEvent(acq_param->acquisition_running);
@@ -266,7 +268,6 @@ unsigned __stdcall ACQDATA(void* lpParam){
         // Wait for each buffer to be filled, process the buffer, and re-post it to the board.
         timeout_ms = 5000;	//Timeout Long Enough
         bufferIndex = 0;
-        float* tbuffer = new float[1024 * alazar->recordsPerBuffer];
         while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0&&success){
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
@@ -291,23 +292,7 @@ unsigned __stdcall ACQDATA(void* lpParam){
 				}
 				acq_time++;
 				if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0){
-					for (int j = 0; j<1024; j++){
-						int line_id=calib_param[j];
-						if (line_id<0){
-							for (int i = 0; i<alazar->recordsPerBuffer; i++)
-								tbuffer[i*1024+j]=0;
-							continue;
-						}
-						float avg=0;
-						for (int i = 0; i<alazar->recordsPerBuffer; i++)
-							avg+=pBuffer[i*alazar->bytesPerRecord + line_id];
-						avg/=alazar->recordsPerBuffer;
-						for (int i = 0; i<alazar->recordsPerBuffer; i++){
-							//tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
-							tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
-						}
-					}
-                    cgl->SendDataToGPU(tbuffer, 1024 * alazar->recordsPerBuffer);
+                    cgl->SendDataToGPU(pBuffer);
                     WaitForSingleObject(_HMutex, INFINITE);
                     cgl->EmptyToFull();
                     ReleaseSemaphore(_HFullGPUMem, 1, NULL);
@@ -325,8 +310,6 @@ unsigned __stdcall ACQDATA(void* lpParam){
             }
         }
         // Abort the acquisition
-        delete[] tbuffer;
-        tbuffer = nullptr;
 		bool scs=adv->StopWaveOut();
         retCode = AlazarAbortAsyncRead(alazar->boardHandle);
         if (retCode != ApiSuccess||scs!=true) success = false;

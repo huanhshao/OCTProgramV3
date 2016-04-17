@@ -7,6 +7,7 @@ OpenCL::OpenCL()
 {
 	clTexMemFront=NULL;
 	clTexMemBack=NULL;
+	cl_calib_mem=NULL;
 	k=0.1;
 	a=10;
 }
@@ -15,8 +16,8 @@ void OpenCL::Initialize(OpenGL& gl){
 		cout<<"OpenCL Failed!"<<endl;
 		exit(0);
 	}
+	cl_calib_mem=GenMem(1024,1,sizeof(cl_int));
 	BindGLTexture(gl.GetFrontTex(),gl.GetBackTex());
-	AcquireTex();
 }
 void OpenCL::BindGLTexture(GLuint front,GLuint back){
 	cl_int err;
@@ -28,6 +29,7 @@ void OpenCL::BindGLTexture(GLuint front,GLuint back){
 OpenCL::~OpenCL(){
 	clReleaseMemObject(clTexMemFront);
 	clReleaseMemObject(clTexMemBack);
+	clReleaseMemObject(cl_calib_mem);
 	if (kfft){
 		clReleaseKernel(kfft);
 	}
@@ -75,7 +77,6 @@ int OpenCL::LoadProgram(const char* filename)
 		char buffer[0x2048];
 		clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
 		cout<<buffer<<endl;
-		system("pause");
 #endif
 		program=0;
 		assert(false);
@@ -126,28 +127,19 @@ int OpenCL::InitCLFromGL()
 	hist = clCreateKernel(program, "hist", NULL);
 	return 0;
 }
-int OpenCL::CheckofPow2(int n)
-{
-	if (n&(n-1))
-	{
+int OpenCL::CheckofPow2(int n){
+	if (n&(n-1)){
 		return 0;
 	}
-	else
-	{
+	else{
 		int m=0;
 		while((n=n>>1))
 			m++;
 		return m;
 	}
 }
-int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count)
-{
-	ReleaseTex();
+int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count){
 	AcquireTex();
-	if(CheckofPow2(n)<1){
-		return 2;
-	}
-	//n must be 1024,otherwise you should write a kernel yourself
 	gws[0]=256;
 	gws[1]=m;
 	lws[0]=256;
@@ -155,16 +147,18 @@ int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count)
 	WaitForSingleObject(_HMutex,INFINITE);
 	clSetKernelArg(kfft, 0, sizeof(cl_mem), (void *)&(pms->memName));
 	clSetKernelArg(kfft, 1, sizeof(cl_mem), (void *)&clTexMemBack);
-	clSetKernelArg(kfft, 2, sizeof(cl_float), (void *)&k);
-	clSetKernelArg(kfft, 3, sizeof(cl_float), (void *)&a);
+	clSetKernelArg(kfft, 2, sizeof(cl_mem), (void *)&cl_calib_mem);
+	clSetKernelArg(kfft, 3, sizeof(cl_int), (void *)&n);
+	clSetKernelArg(kfft, 4, sizeof(cl_float), (void *)&k);
+	clSetKernelArg(kfft, 5, sizeof(cl_float), (void *)&a);
 	ReleaseMutex(_HMutex);
 	cl_event fftEvent;
 	clEnqueueNDRangeKernel(queue, kfft, 2, NULL, gws, lws, 1, &pms->writeEvent, &fftEvent);
 	clWaitForEvents(1,&fftEvent);
+	ReleaseTex();
 	return 0;
 }
-void OpenCL::SetHstParam(double min,double max,double lastMin,double lastMax)
-{
+void OpenCL::SetHstParam(double min,double max,double lastMin,double lastMax){
 	//k=((float)(lastMax-lastMin))/((float)(max-min))*k;
 	//a=(min-lastMin)/k/(max-min)+a;
 	WaitForSingleObject(_HMutex,INFINITE);
@@ -172,16 +166,16 @@ void OpenCL::SetHstParam(double min,double max,double lastMin,double lastMax)
 	k=min;
 	ReleaseMutex(_HMutex);
 }
-cl_mem OpenCL::GenMem(int n,int m)
-{
-	return clCreateBuffer(context,CL_MEM_READ_WRITE,n*m*sizeof(cl_float),NULL,NULL);
+cl_mem OpenCL::GenMem(int n,int m,size_t sample_byte){
+	return clCreateBuffer(context,CL_MEM_READ_WRITE,n*m*sample_byte,NULL,NULL);
 }
-void OpenCL::WriteBuffer(float* buffer,memStat* pms,size_t bufferLength)
-{
-	clEnqueueWriteBuffer(queue,pms->memName,CL_TRUE,0,sizeof(float)*bufferLength,buffer,0,NULL,&pms->writeEvent);
+void OpenCL::WriteBuffer(unsigned char* buffer,memStat* pms,size_t bufferLength){
+	clEnqueueWriteBuffer(queue,pms->memName,CL_TRUE,0,sizeof(unsigned char)*bufferLength,buffer,0,NULL,&pms->writeEvent);
 }
-void OpenCL::ReleaseMem(cl_mem mem)
-{
+void OpenCL::WriteCalib(vector<int>&calib_indexs){
+	clEnqueueWriteBuffer(queue,cl_calib_mem,CL_TRUE,0,sizeof(int)*1024,&calib_indexs[0],0,NULL,NULL);
+}
+void OpenCL::ReleaseMem(cl_mem mem){
 	if (mem!=nullptr)
 		clReleaseMemObject(mem);
 }
