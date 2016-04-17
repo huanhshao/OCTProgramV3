@@ -111,7 +111,7 @@ namespace OCTProgram{
 		triggerLevelK=(U32)(engines["trigger_level"].asInt());
 		triggerExCouplingId=(U32)(section["trigger_ex_coupling"].asInt());
 		triggerExRangeId=(U32)(section["trigger_ex_range"].asInt());
-		triggerDelaySec=section["trigger_delay"].asDouble();
+		triggerDelaySamples=section["trigger_delay"].asInt();
 		triggerTimeoutSec=section["trigger_timeout"].asDouble();
 
 		section=root["AUX"];
@@ -123,6 +123,11 @@ namespace OCTProgram{
 		postTriggerSamples=(U32)(section["post_trigger_samples"].asInt());
 		recordsPerBuffer=(U32)(section["record_per_buffer"].asInt());
 		buffersPerImage=(U32)(section["buffers_per_image"].asInt());
+
+		section=root["calib_params"];
+		calib_start_index=section["start_index"].asInt();
+		calib_end_index=section["end_index"].asInt();
+		calib_record_num=section["record_num_in_use"].asInt();
 	}
 	void AlazarInfo::SetChannalMask(int channalID)
 	{
@@ -205,7 +210,6 @@ namespace OCTProgram{
 		{
 			return retCode;
 		}
-		triggerDelaySamples=static_cast<U32>(triggerDelaySec*samplesPerSec+0.5);
 		retCode=AlazarSetTriggerDelay(boardHandle, triggerDelaySamples);
 		if (retCode != ApiSuccess)
 		{

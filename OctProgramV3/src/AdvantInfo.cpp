@@ -49,7 +49,7 @@ namespace OCTProgram{
 		}
 	}
 	bool AdvInfo::StartWaveOut(){
-		//return true;
+		return true;
 		if (globle_mem_out_handle_==NULL||globle_mem_out_==nullptr){
 			cout<<"ERROR!!Can't Find Data Buffer!!"<<endl;
 			return false;

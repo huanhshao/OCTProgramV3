@@ -26,6 +26,10 @@ namespace OCTProgram
 		U32 bytesPerRecord;
 		U32 bytesPerBuffer;
 		int buffersPerImage;
+		
+		int calib_start_index;
+		int calib_end_index;
+		int calib_record_num;
 	protected:
 		U32 systemId;
 		U32 boardId;
@@ -52,7 +56,6 @@ namespace OCTProgram
 		U32 triggerLevelK;
 		U32 triggerExCouplingId;
 		U32 triggerExRangeId;
-		double triggerDelaySec;
 		double triggerTimeoutSec;
 
 		U32 AUXMode;
@@ -70,6 +73,9 @@ namespace OCTProgram
 		void StopAcq();
 		//int CalibData(int mode,char* dataFile,char* indexFile);
 		void SetChannalMask(int channalID);
+		void ParseError(RETURN_CODE rc){
+			cerr<<"Error "<<rc<<";"<<AlazarErrorToText(rc)<<endl;
+		}
 	private:
 		bool GetCfgParam(char*);
 		RETURN_CODE CfgBoard4Para();

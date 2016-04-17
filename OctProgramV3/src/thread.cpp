@@ -41,13 +41,14 @@ void GetGaussianKernel(int n, double sigma, std::vector<double> &res){
 	}
 	res.swap(coefficients);
 }
-unsigned __stdcall ACQDATA(void* lpParam)
-{
+unsigned __stdcall ACQDATA(void* lpParam){
 	AcqParam* acq_param=reinterpret_cast<AcqParam*>(lpParam);
     OCTProgram::AlazarInfo* alazar = acq_param->alazar;
     OpenCLGLClass* cgl = acq_param->clgl;
 	OCTProgram::AdvInfo* adv=acq_param->adv;
-	std::vector<int> calib_param;
+	vector<int> calib_param;
+	vector<double> gauss_factor;
+	GetGaussianKernel(kGaussLength,kGaussSigma,gauss_factor);
     bool success = true;
 	DWORD time_out = 1000;       //maximum waiting time 1 second
     while (WaitForSingleObject(acq_param->end_thread, 0) != WAIT_OBJECT_0){
@@ -109,8 +110,7 @@ unsigned __stdcall ACQDATA(void* lpParam)
         }
         if (success){
             vector<double> calib_data(alazar->bytesPerRecord);
-            //double average_length = 10;
-            double average_length = alazar->recordsPerBuffer;
+            double average_length = alazar->calib_record_num;
 			double calib_mean=0;
             for (vector<double>::size_type i = 0; i!=calib_data.size(); i++){
                 calib_data[i] = 0;
@@ -121,10 +121,8 @@ unsigned __stdcall ACQDATA(void* lpParam)
             }
 			calib_mean/=calib_data.size();
             std::vector<double> tmp(calib_data.size(),0);
-			int start_id=kGaussHalf;
-			int end_id=calib_data.size()-kGaussHalf;
-			vector<double> gauss_factor;
-			GetGaussianKernel(kGaussLength,kGaussSigma,gauss_factor);
+			int start_id=kGaussHalf+alazar->calib_start_index;
+			int end_id=alazar->calib_end_index-kGaussHalf;
             for (int i = start_id; i<end_id; i++){
                 double d = 0;
                 for (int j = -kGaussHalf; j<=kGaussHalf; j++){
@@ -208,8 +206,8 @@ unsigned __stdcall ACQDATA(void* lpParam)
             continue;
         }
         ///////////////////////Acq Begin///////////////////////////
-        //alazar->SetChannalMask(1);			//CHANNAL_A = 1
-		alazar->SetChannalMask(3);				//CHANNAL_A | B = 3
+        alazar->SetChannalMask(1);			//CHANNAL_A = 1
+		//alazar->SetChannalMask(3);				//CHANNAL_A | B = 3
         fpData = fopen("../../../data.bin", "wb");
         strpro = "OCT Data Created By OCTProgram V2.1. Image Size:";
         fwrite(strpro, sizeof(BYTE), 49, fpData);
@@ -228,7 +226,10 @@ unsigned __stdcall ACQDATA(void* lpParam)
                 alazar->preTriggerSamples,
                 alazar->postTriggerSamples
                 );
-            if (retCode != ApiSuccess) success = false;
+            if (retCode != ApiSuccess) {
+				alazar->ParseError(retCode);
+				success = false;
+			}
         }
         if (success){
 			U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT;
@@ -241,17 +242,26 @@ unsigned __stdcall ACQDATA(void* lpParam)
                 0x7fffffff,
                 admaFlags
                 );
-            if (retCode != ApiSuccess) success = false;
+			if (retCode != ApiSuccess) {
+				alazar->ParseError(retCode);
+				success = false;
+			}
         }
         for (bufferIndex = 0; (bufferIndex < alazar->BUFFER_COUNT) && (success == true); bufferIndex++){
             pBuffer = alazar->bufferArray[bufferIndex];
             retCode = AlazarPostAsyncBuffer(alazar->boardHandle, pBuffer, alazar->bytesPerBuffer);
-            if (retCode != ApiSuccess) success = false;
+			if (retCode != ApiSuccess) {
+				alazar->ParseError(retCode);
+				success = false;
+			}
         }
         if (success){
 			bool scs= adv->StartWaveOut();
             retCode = AlazarStartCapture(alazar->boardHandle);
-            if (retCode != ApiSuccess || scs!= true) success = false;
+			if (retCode != ApiSuccess) {
+				alazar->ParseError(retCode);
+				success = false;
+			}
         }
         // Wait for each buffer to be filled, process the buffer, and re-post it to the board.
         timeout_ms = 5000;	//Timeout Long Enough
@@ -261,10 +271,13 @@ unsigned __stdcall ACQDATA(void* lpParam)
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
             retCode = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
-            if (retCode != ApiSuccess) success = false;
+			if (retCode != ApiSuccess) {
+				alazar->ParseError(retCode);
+				success = false;
+			}
             if (success){
-				if (acq_time%100==0&&acq_time<1001){
-				//if (acq_time==0){
+				//if (acq_time%100==0&&acq_time<1001){
+				if (acq_time==0){
 					U8* pRecord = pBuffer;
 					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
 					    for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++){
@@ -274,7 +287,6 @@ unsigned __stdcall ACQDATA(void* lpParam)
 					        savedBuffer++;
 					    }
 					}
-					cout<<acq_time/100<<endl;
 				}
 				acq_time++;
 				for (int j = 0; j<1024; j++){
@@ -293,41 +305,22 @@ unsigned __stdcall ACQDATA(void* lpParam)
                         tbuffer[i*1024+j]=pBuffer[i*alazar->bytesPerRecord+line_id]-127;
 					}
                 }
-                if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0)
-                {
+                if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0){
                     cgl->SendDataToGPU(tbuffer, 1024 * alazar->recordsPerBuffer);
                     WaitForSingleObject(_HMutex, INFINITE);
                     cgl->EmptyToFull();
                     ReleaseSemaphore(_HFullGPUMem, 1, NULL);
                     ReleaseMutex(_HMutex);
                 }
-                //Saving Mode Not Allowed Now!!
-                //WaitForSingleObject(_HMutex, INFINITE);
-                //if (alazar->acqMode == 1)
-                //{
-                //    ReleaseMutex(_HMutex);
-                //    U8* pRecord = pBuffer;
-                //    for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++)
-                //    {
-                //        for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++)
-                //        {
-                //            size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
-                //            if (bytesWritten != alazar->bytesPerRecord) success = false;
-                //            pRecord += alazar->samplesPerRecord;
-                //            savedBuffer++;
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    ReleaseMutex(_HMutex);
-                //}
                 bufferIndex++;
             }
             if (success)
             {
                 retCode = AlazarPostAsyncBuffer(alazar->boardHandle, pBuffer, alazar->bytesPerBuffer);
-                if (retCode != ApiSuccess) success = false;
+				if (retCode != ApiSuccess) {
+					alazar->ParseError(retCode);
+					success = false;
+				}
             }
         }
         // Abort the acquisition
