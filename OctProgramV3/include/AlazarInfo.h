@@ -3,10 +3,8 @@
 #include "api/AlazarApi.h"
 #include "api/AlazarCmd.h"
 
-namespace OCTProgram
-{
-	class AlazarInfo
-	{
+namespace OCTProgram{
+	class AlazarInfo{
 	public:
 		AlazarInfo();
 		~AlazarInfo();
@@ -71,7 +69,6 @@ namespace OCTProgram
 		bool IsAcqStoped();
 		void BeginAcq();
 		void StopAcq();
-		//int CalibData(int mode,char* dataFile,char* indexFile);
 		void SetChannalMask(int channalID);
 		bool ParseError(RETURN_CODE rc){
 			if (rc!=ApiSuccess){
@@ -81,11 +78,12 @@ namespace OCTProgram
 			return true;
 		}
 		bool ReadCalibrationData(vector<double>& calib_data);
+        bool ReadDriftData(vector<int>& calib_index,vector<float>& drift);
+        bool BeforeAsyncAcqusition(int channel,int buffer_num);
 	private:
 		bool GetCfgParam(char*);
 		RETURN_CODE CfgBoard4Para();
 		RETURN_CODE GetAcqParam();
 		void DeleteBuffer();
-		bool BeforeAsyncAcqusition(int channel);
 	};
 }

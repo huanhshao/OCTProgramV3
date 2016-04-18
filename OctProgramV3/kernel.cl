@@ -48,8 +48,8 @@ MyWriteImage(__write_only image2d_t img,float4 colors,uint gid,uint lid){
 	write_imagef(img,coord,color);
 }
 __kernel __attribute__((reqd_work_group_size (256,1,1))) void
-kfft(__global uchar* data,__write_only image2d_t img,__global int* calibs,
-int record_size,float k,float a){
+kfft(__global uchar* data,int record_size,__global int* calibs,__global float* drift,
+float k,float a,__write_only image2d_t img){
 	uint gid=get_local_id(0);
 	uint lid=get_group_id(1);
 	gid=gid&0xffu;
@@ -65,13 +65,13 @@ int record_size,float k,float a){
 	float2 in2=(float2)(0,0);
 	float2 in3=(float2)(0,0);
 	if (iid0>0)
-		in0.x=(float)gr[iid0]-127;
+		in0.x=(float)gr[iid0]-drift[gid];
 	if (iid1>0)
-		in1.x=(float)gr[iid1]-127;
+		in1.x=(float)gr[iid1]-drift[gid+256];
 	if (iid2>0)
-		in2.x=(float)gr[iid2]-127;
+		in2.x=(float)gr[iid2]-drift[gid+512];
 	if (iid3>0)
-		in3.x=(float)gr[iid3]-127;
+		in3.x=(float)gr[iid3]-drift[gid+768];
 	uint ns=1;
 	uint kw=4;
 	uint i=0;

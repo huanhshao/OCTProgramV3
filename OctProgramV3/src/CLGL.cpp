@@ -19,8 +19,7 @@ void OpenCLGLClass::Initialize(HDC hdc,int n,int m){
 	mcl.Initialize(mgl);
 	PrepareResources(n,m);
 }
-OpenCLGLClass::~OpenCLGLClass()
-{
+OpenCLGLClass::~OpenCLGLClass(){
 	ReleaseMem();
 }
 void OpenCLGLClass::ClearQueue(std::queue<memStat*> mem_queue){
@@ -49,6 +48,14 @@ void OpenCLGLClass::PrepareResources(int n,int m){
 		mcl.BindGLTexture(mgl.GetFrontTex(),mgl.GetBackTex());
 		mcl.AcquireTex();
 	}
+}
+void OpenCLGLClass::WriteCalibIndex(vector<int>& calib_index){
+    assert(calib_index.size()==1024);
+    mcl.WriteCalib(calib_index);
+}
+void OpenCLGLClass::WriteDriftData(vector<float>& drift){
+    assert(drift.size()==1024);
+    mcl.WriteDrift(drift);
 }
 void OpenCLGLClass::SendDataToGPU(unsigned char* buffer){
 	if (!memQueueEm.size())
@@ -83,42 +90,25 @@ void OpenCLGLClass::SwapTexBuffer(){
 	mcl.AcquireTex();
 	switchCount++;
 }
-int OpenCLGLClass::GetFPS()
-{
+int OpenCLGLClass::GetFPS(){
 	return (int)(FPS*100);
 }
-void OpenCLGLClass::SetColorLevels(double a,double b)
-{
-	//if (a==b)
-	//	return;
-	//if (a>b)
-	//{
-	//	a=a+b;
-	//	b=a-b;
-	//	a=a-b;
-	//}
+void OpenCLGLClass::SetColorLevels(double a,double b){
 	mcl.SetHstParam(a,b,minLev,maxLev);
-	//minLev=a;
-	//maxLev=b;
 }
-void OpenCLGLClass::SetGLContext(int i)
-{
+void OpenCLGLClass::SetGLContext(int i){
 	mgl.SetContext(i);
 }
-void OpenCLGLClass::SetViewPort(int x, int y, int width, int height)
-{
+void OpenCLGLClass::SetViewPort(int x, int y, int width, int height){
 	mgl.ViewPort(x,y,width,height);
 }
-void OpenCLGLClass::RenderScene()
-{
+void OpenCLGLClass::RenderScene(){
 	mgl.RenderScene();
 }
-bool OpenCLGLClass::CaptureScreen()
-{
+bool OpenCLGLClass::CaptureScreen(){
 	return mgl.CaptureScreen();
 }
-void OpenCLGLClass::CalHistogram(int* hst)
-{
+void OpenCLGLClass::CalHistogram(int* hst){
 	for (int i=0;i<256;i++){
 		hst[i]=0;
 	}

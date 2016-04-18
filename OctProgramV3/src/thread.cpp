@@ -5,24 +5,6 @@
 const int kGaussHalf=3;
 const int kGaussLength = 2*kGaussHalf+1;
 const double kGaussSigma=1;
-//const double gauss_factor[41] = {
-//	0.0003,    0.0007,    0.0015,    0.0031,
-//	0.0060,    0.0111,    0.0198,    0.0340,
-//	0.0561,    0.0889,    0.1353,    0.1979,
-//	0.2780,    0.3753,    0.4868,    0.6065,
-//	0.7261,    0.8353,    0.9231,    0.9802,
-//	1.0000,    0.9802,    0.9231,    0.8353,
-//	0.7261,    0.6065,    0.4868,    0.3753,
-//	0.2780,    0.1979,    0.1353,    0.0889,
-//	0.0561,    0.0340,    0.0198,    0.0111,
-//	0.0060,    0.0031,    0.0015,    0.0007,
-//	0.0003
-//};
-template<typename T>
-inline T sqr(const T &x) {
-	return x*x;
-}
-
 unsigned __stdcall ACQDATA(void* lpParam){
 	AcqParam* acq_param=reinterpret_cast<AcqParam*>(lpParam);
     OCTProgram::AlazarInfo* alazar = acq_param->alazar;
@@ -38,8 +20,8 @@ unsigned __stdcall ACQDATA(void* lpParam){
         SetEvent(acq_param->acquisition_running);
         ReleaseMutex(_HMutex);
 		bool success = true;
-        //////////////////Calibration Begin//////////////////////////////
-        //acquisition begin
+        //////////////////Prepare Begin//////////////////////////////
+        //calibration param
 		vector<double> calib_data;
 		success=alazar->ReadCalibrationData(calib_data);
         if (success){
@@ -48,84 +30,39 @@ unsigned __stdcall ACQDATA(void* lpParam){
 				calib_param);
 			cgl->WriteCalibIndex(calib_param);
         }
+        //DC_drift param
+        vector<float> dc_drift_data;
+        success=alazar->ReadDriftData(calib_param,dc_drift_data);
+        if (success){
+            cgl->WriteDriftData(dc_drift_data);
+        }
+        //check state
         if (WaitForSingleObject(acq_param->begin_acquisition, 0) != WAIT_OBJECT_0){
 			WaitForSingleObject(_HMutex, INFINITE);
 			ResetEvent(acq_param->acquisition_running);
 			ReleaseMutex(_HMutex);
             continue;
         }
-        ///////////////////////Acq Begin///////////////////////////
-        alazar->SetChannalMask(1);			//CHANNAL_A = 1
-		//alazar->SetChannalMask(3);				//CHANNAL_A | B = 3
-        fpData = fopen("../../../data.bin", "wb");
-        strpro = "OCT Data Created By OCTProgram V2.1. Image Size:";
-        fwrite(strpro, sizeof(BYTE), 49, fpData);
-		int acq_time = 0;
-		strpro = new char[4];
-        strpro[0] = alazar->bytesPerRecord / 256;
-        strpro[1] = alazar->bytesPerRecord % 256;
-        strpro[2] = alazar->recordsPerBuffer / 256;
-        strpro[3] = alazar->recordsPerBuffer % 256;     //maximum: 65535*65535
-        fwrite(strpro, sizeof(BYTE), 4, fpData);
-        delete[] strpro;                                //total head length 53
-        int savedBuffer = 0;
+        ///////////////////////Acqusition Begin///////////////////////////
+        success=alazar->BeforeAsyncAcqusition(CHANNEL_A,-1);
         if (success){
-            retCode = AlazarSetRecordSize(
-                alazar->boardHandle,
-                alazar->preTriggerSamples,
-                alazar->postTriggerSamples
-                );
-            if (retCode != ApiSuccess) {
-				alazar->ParseError(retCode);
-				success = false;
-			}
+			success = adv->StartWaveOut();
         }
-        if (success){
-			U32 admaFlags = ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT;
-            retCode = AlazarBeforeAsyncRead(
-                alazar->boardHandle,
-                alazar->inputChannel,
-                -(long)alazar->preTriggerSamples,
-                alazar->samplesPerRecord,
-                alazar->recordsPerBuffer,
-                0x7fffffff,
-                admaFlags
-                );
-			if (retCode != ApiSuccess) {
-				alazar->ParseError(retCode);
-				success = false;
-			}
-        }
-        for (bufferIndex = 0; (bufferIndex < alazar->BUFFER_COUNT) && (success == true); bufferIndex++){
-            pBuffer = alazar->bufferArray[bufferIndex];
-            retCode = AlazarPostAsyncBuffer(alazar->boardHandle, pBuffer, alazar->bytesPerBuffer);
-			if (retCode != ApiSuccess) {
-				alazar->ParseError(retCode);
-				success = false;
-			}
-        }
-        if (success){
-			bool scs= adv->StartWaveOut();
+        if (success)
             retCode = AlazarStartCapture(alazar->boardHandle);
-			if (retCode != ApiSuccess) {
-				alazar->ParseError(retCode);
-				success = false;
-			}
+            success=alazar->ParseError(retCode);
         }
         // Wait for each buffer to be filled, process the buffer, and re-post it to the board.
-        timeout_ms = 5000;	//Timeout Long Enough
-        bufferIndex = 0;
+        DWORD timeout_ms = 5000;
+        U32 bufferIndex = 0;
+        RETURN_CODE return_code;
+        fpData = fopen("../../../data.bin", "wb");
         while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0&&success){
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
-            retCode = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
-			if (retCode != ApiSuccess) {
-				alazar->ParseError(retCode);
-				success = false;
-			}
+            return_code = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
+            success = alazar->ParseError(return_code);
             if (success){
-				//if (acq_time%100==0&&acq_time<1001){
-				
 				if (acq_time==0){
 					U8* pRecord = pBuffer;
 					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
@@ -147,27 +84,16 @@ unsigned __stdcall ACQDATA(void* lpParam){
                 }
                 bufferIndex++;
             }
-            if (success)
-            {
-                retCode = AlazarPostAsyncBuffer(alazar->boardHandle, pBuffer, alazar->bytesPerBuffer);
-				if (retCode != ApiSuccess) {
-					alazar->ParseError(retCode);
-					success = false;
-				}
+            if (success){
+                return_code = AlazarPostAsyncBuffer(alazar->boardHandle, pBuffer, alazar->bytesPerBuffer);
+                success = alazar->ParseError(return_code);
             }
         }
         // Abort the acquisition
-		bool scs=adv->StopWaveOut();
-        retCode = AlazarAbortAsyncRead(alazar->boardHandle);
-        if (retCode != ApiSuccess||scs!=true) success = false;
+		success = adv->StopWaveOut();
+        return_code = AlazarAbortAsyncRead(alazar->boardHandle);
+        success&=alazar->ParseError(return_code);
         if (fpData != NULL){
-            strpro = new char[4];
-            strpro[0] = savedBuffer / 16777215;
-            strpro[1] = savedBuffer / 65536 - strpro[0] * 256;
-            strpro[2] = (savedBuffer % 65536) / 256;
-            strpro[3] = savedBuffer % 256;
-            fwrite(strpro, sizeof(BYTE), 4, fpData);
-            delete[] strpro;
             fclose(fpData);
         }
 		if (!success){
@@ -179,22 +105,17 @@ unsigned __stdcall ACQDATA(void* lpParam){
 		ResetEvent(acq_param->acquisition_running);
 		ReleaseMutex(_HMutex);
     }
-    //WaitForSingleObject(_HMutex, INFINITE);
     ResetEvent(acq_param->acquisition_running);
-    //ReleaseMutex(_HMutex);
     _endthreadex(0);
     return 0;
 }
-
-unsigned __stdcall PROCESSDATA(void* lpParam)
-{
+unsigned __stdcall PROCESSDATA(void* lpParam){
 	ProcessParam* process_param=reinterpret_cast<ProcessParam*>(lpParam);
     OpenCLGLClass* cgl = process_param->clgl;
     DWORD time_out = 1000;       //maximum waiting time 1 second
     cgl->SetGLContext(1);       //set rc to shared
     while (WaitForSingleObject(process_param->end_thread, 0) != WAIT_OBJECT_0){
-        if (WaitForSingleObject(_HFullGPUMem, time_out) == WAIT_OBJECT_0)
-        {
+        if (WaitForSingleObject(_HFullGPUMem, time_out) == WAIT_OBJECT_0){
             cgl->CalFFT();
             WaitForSingleObject(_HMutex, INFINITE);
             cgl->FullToEmpty();

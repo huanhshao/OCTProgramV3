@@ -3,11 +3,11 @@
 #include "CLGL.h"
 
 //#pragma OPENCL EXTENSION cl_khr_gl_event : enable
-OpenCL::OpenCL()
-{
+OpenCL::OpenCL(){
 	clTexMemFront=NULL;
 	clTexMemBack=NULL;
 	cl_calib_mem=NULL;
+    cl_drift_mem=NULL;
 	k=0.1;
 	a=10;
 }
@@ -17,6 +17,7 @@ void OpenCL::Initialize(OpenGL& gl){
 		exit(0);
 	}
 	cl_calib_mem=GenMem(1024,1,sizeof(cl_int));
+    cl_drift_mem=GenMem(1024,1,sizeof(cl_float));
 	BindGLTexture(gl.GetFrontTex(),gl.GetBackTex());
 }
 void OpenCL::BindGLTexture(GLuint front,GLuint back){
@@ -30,41 +31,27 @@ OpenCL::~OpenCL(){
 	clReleaseMemObject(clTexMemFront);
 	clReleaseMemObject(clTexMemBack);
 	clReleaseMemObject(cl_calib_mem);
-	if (kfft){
-		clReleaseKernel(kfft);
-	}
-	if (hist){
-		clReleaseKernel(hist);
-	}
-	if (program!=0){
-		clReleaseProgram(program);
-	}
-	if (queue!=0){
-		clReleaseCommandQueue(queue);
-	}
-	if (context!=0){
-		clReleaseContext(context);
-	}
+	if (kfft) clReleaseKernel(kfft);
+	if (hist) clReleaseKernel(hist);
+	if (program!=0) clReleaseProgram(program);
+	if (queue!=0) clReleaseCommandQueue(queue);
+	if (context!=0) clReleaseContext(context);
 }
-int OpenCL::LoadProgram(const char* filename)
-{
+int OpenCL::LoadProgram(const char* filename){
 	std::ifstream ifs(filename, std::ios_base::binary);
 	if(!ifs.good()){
 		cout<<"Can't Find Kernal File!!";
 		program=0;
 		return 1;
 	}
-	
 	// get file length
 	ifs.seekg(0, std::ios_base::end);
 	size_t length = static_cast<size_t>(ifs.tellg());
 	ifs.seekg(0, std::ios_base::beg);
-
 	// read program source
 	std::vector<char> data(length + 1);
 	ifs.read(&data[0], length);
 	data[length] = 0;
-
 	// create and build program 
 	const char* source = &data[0];
 	program = clCreateProgramWithSource(context, 1, &source, 0, 0);
@@ -84,11 +71,9 @@ int OpenCL::LoadProgram(const char* filename)
 	}
 	return 0;
 }
-int OpenCL::InitCLFromGL()
-{
+int OpenCL::InitCLFromGL(){
 	cl_int err;
 	cl_uint numPlt;
-
 	err = clGetPlatformIDs(0, 0, &numPlt);
 	if(err != CL_SUCCESS||numPlt<=0) {
 		return 1;
@@ -98,14 +83,12 @@ int OpenCL::InitCLFromGL()
 	if(err != CL_SUCCESS) {
 		return 1;
 	}
-
 	cl_uint numDev;
 	err=clGetDeviceIDs(platforms[0],CL_DEVICE_TYPE_GPU,0,NULL,&numDev);
 	if (err != CL_SUCCESS||numDev<=0){
 		return 1;
 	}
 	err=clGetDeviceIDs(platforms[0],CL_DEVICE_TYPE_GPU,1,&device_id,NULL);
-
 	cl_context_properties properties[] = {
 		CL_GL_CONTEXT_KHR, (cl_context_properties) wglGetCurrentContext(),
 		CL_WGL_HDC_KHR, (cl_context_properties) wglGetCurrentDC(),
@@ -113,7 +96,6 @@ int OpenCL::InitCLFromGL()
 		0
 	};
 	context=clCreateContext(properties,1,&device_id,NULL,NULL,NULL);
-
 	queue = clCreateCommandQueue(context, device_id, 0, 0);
 	if(queue == 0){
 		return 1;
@@ -146,11 +128,12 @@ int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count){
 	lws[1]=1;
 	WaitForSingleObject(_HMutex,INFINITE);
 	clSetKernelArg(kfft, 0, sizeof(cl_mem), (void *)&(pms->memName));
-	clSetKernelArg(kfft, 1, sizeof(cl_mem), (void *)&clTexMemBack);
+    clSetKernelArg(kfft, 1, sizeof(cl_int), (void *)&n);
 	clSetKernelArg(kfft, 2, sizeof(cl_mem), (void *)&cl_calib_mem);
-	clSetKernelArg(kfft, 3, sizeof(cl_int), (void *)&n);
+    clSetKernelArg(kfft, 3, sizeof(cl_mem), (void *)&cl_drift_mem);
 	clSetKernelArg(kfft, 4, sizeof(cl_float), (void *)&k);
 	clSetKernelArg(kfft, 5, sizeof(cl_float), (void *)&a);
+    clSetKernelArg(kfft, 6, sizeof(cl_mem), (void *)&clTexMemBack);
 	ReleaseMutex(_HMutex);
 	cl_event fftEvent;
 	clEnqueueNDRangeKernel(queue, kfft, 2, NULL, gws, lws, 1, &pms->writeEvent, &fftEvent);
@@ -159,8 +142,6 @@ int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count){
 	return 0;
 }
 void OpenCL::SetHstParam(double min,double max,double lastMin,double lastMax){
-	//k=((float)(lastMax-lastMin))/((float)(max-min))*k;
-	//a=(min-lastMin)/k/(max-min)+a;
 	WaitForSingleObject(_HMutex,INFINITE);
 	a=max;
 	k=min;
@@ -175,27 +156,26 @@ void OpenCL::WriteBuffer(unsigned char* buffer,memStat* pms,size_t bufferLength)
 void OpenCL::WriteCalib(vector<int>&calib_indexs){
 	clEnqueueWriteBuffer(queue,cl_calib_mem,CL_TRUE,0,sizeof(int)*1024,&calib_indexs[0],0,NULL,NULL);
 }
+void OpenCL::WriteDrift(vector<float>& drifts){
+    clEnqueueWriteBuffer(queue,cl_drift_mem,CL_TRUE,0,sizeof(float)*1024,&drifts[0],0,NULL,NULL);
+}
 void OpenCL::ReleaseMem(cl_mem mem){
 	if (mem!=nullptr)
 		clReleaseMemObject(mem);
 }
-void OpenCL::SwapTexMem()
-{
+void OpenCL::SwapTexMem(){
 	cl_mem tmp;
 	tmp=clTexMemBack;
 	clTexMemBack=clTexMemFront;
 	clTexMemFront=tmp;
 }
-void OpenCL::AcquireTex()
-{
+void OpenCL::AcquireTex(){
 	clEnqueueAcquireGLObjects(queue,1,&clTexMemBack,0,NULL,NULL);
 }
-void OpenCL::ReleaseTex()
-{
+void OpenCL::ReleaseTex(){
 	clEnqueueReleaseGLObjects(queue,1,&clTexMemBack,0,NULL,NULL);
 }
-void OpenCL::EnqueueCalHist(int* hst,int n,int m)
-{
+void OpenCL::EnqueueCalHist(int* hst,int n,int m){
 	const int COUNTN=64;
 	cl_event hstEvent;
 	cl_mem hstGpu=clCreateBuffer(context,CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR,256*sizeof(cl_int),hst,NULL);

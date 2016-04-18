@@ -310,6 +310,7 @@ namespace OCTProgram{
 	bool AlazarInfo::ReadCalibrationData(vector<double>& calib_data){
 		bool success=BeforeAsyncAcqusition(CHANNEL_B,1);
 		RETURN_CODE return_code;
+        calib_data.resize(bytesPerRecord,0);
 		if (success){
 			return_code = AlazarStartCapture(boardHandle);
 			success = ParseError(return_code);
@@ -327,7 +328,6 @@ namespace OCTProgram{
 			cerr<<"Read Calib Data Failed!!"<<endl;
 		}
 		if (success){
-			calib_data.resize(bytesPerRecord);
 			for (int i=0;i<calib_data.size();i++){
 				calib_data[i] = 0;
 				for (int j = 0; j<calib_record_num; j++){
@@ -348,4 +348,46 @@ namespace OCTProgram{
 		}
 		return success;
 	}
+    bool AlazarInfo::ReadDriftData(vector<int>& calib_index,vector<float>& drift){
+        bool success=BeforeAsyncAcqusition(CHANNEL_A,1);
+        RETURN_CODE return_code;
+        drift.resize(calib_index.size(),0);
+		if (success){
+			return_code = AlazarStartCapture(boardHandle);
+			success = ParseError(return_code);
+		}
+		U8* pBuffer=nullptr;
+		if (success){
+			DWORD timeout_ms = 5000;
+			pBuffer=bufferArray[0];
+			return_code = AlazarWaitAsyncBufferComplete(boardHandle, pBuffer, timeout_ms);
+			success = ParseError(return_code);
+			return_code = AlazarAbortAsyncRead(boardHandle);
+			success = ParseError(return_code);
+		}
+		if (!success){
+			cerr<<"Read Drift Data Failed!!"<<endl;
+		}
+		if (success){
+            for (int i=0;i<drift.size();i++){
+                drift[i]=0;
+                for (int j=0;j<recordPerBuffer;j++){
+                    drift[i]+=pBuffer[j*bytesPerRecord+calib_index[i]]
+                }
+                drift[i]/=recordPerBuffer;
+            }
+			//save drift data for other use
+			FILE* fpData = fopen("../../../Drifts.dat", "wb");
+			U8* pRecord = pBuffer;
+			for (U32 record = 0; (record < recordsPerBuffer) && (success == TRUE); record++){
+				size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
+				if (bytesWritten != bytesPerRecord){
+					success = false;
+				}
+				pRecord += samplesPerRecord;
+			}
+			fclose(fpData);
+		}
+		return success;
+    }
 }
