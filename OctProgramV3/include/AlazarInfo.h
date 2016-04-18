@@ -73,13 +73,19 @@ namespace OCTProgram
 		void StopAcq();
 		//int CalibData(int mode,char* dataFile,char* indexFile);
 		void SetChannalMask(int channalID);
-		void ParseError(RETURN_CODE rc){
-			cerr<<"Error "<<rc<<";"<<AlazarErrorToText(rc)<<endl;
+		bool ParseError(RETURN_CODE rc){
+			if (rc!=ApiSuccess){
+				cerr<<"Error "<<rc<<";"<<AlazarErrorToText(rc)<<endl;
+				return false;
+			}
+			return true;
 		}
+		bool ReadCalibrationData(vector<double>& calib_data);
 	private:
 		bool GetCfgParam(char*);
 		RETURN_CODE CfgBoard4Para();
 		RETURN_CODE GetAcqParam();
 		void DeleteBuffer();
+		bool BeforeAsyncAcqusition(int channel);
 	};
 }

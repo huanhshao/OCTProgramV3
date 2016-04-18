@@ -109,6 +109,7 @@ public:
 	void FullToEmpty();
     void EmptyToFull();
 	void WriteCalibIndex(vector<int>& calib_index){
+		assert(calib_index.size()==1024);
 		mcl.WriteCalib(calib_index);
 	}
 private:

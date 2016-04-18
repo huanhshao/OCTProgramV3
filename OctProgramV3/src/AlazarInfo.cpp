@@ -269,4 +269,83 @@ namespace OCTProgram{
 		*w=samplesPerRecord;
 		*h=recordsPerBuffer;
 	}
+	bool AlazarInfo::BeforeAsyncAcqusition(int channel,int buffer_nums){
+		SetChannalMask(channel);
+		bool success=true;
+		RETURN_CODE return_code;
+		int record_nums=0;
+		if (buffer_nums<0)
+			record_nums=0x7fffffff;
+		else
+			record_nums=buffer_nums*recordsPerBuffer;
+		if (success){
+			return_code = AlazarSetRecordSize(
+				boardHandle,
+				preTriggerSamples,
+				postTriggerSamples
+				);
+			success = ParseError(return_code);
+		}
+		if (success){
+			return_code = AlazarBeforeAsyncRead(
+				boardHandle,
+				inputChannel,
+				-(long)preTriggerSamples,
+				samplesPerRecord,
+				recordsPerBuffer,
+				record_nums,
+				ADMA_EXTERNAL_STARTCAPTURE | ADMA_NPT
+				);
+			success = ParseError(return_code);
+		}
+		for (U32 bufferIndex = 0;
+			(bufferIndex < BUFFER_COUNT) && (buffer_nums<0||bufferIndex<buffer_nums) && (success == true); 
+			bufferIndex++){
+			U8* pBuffer = bufferArray[bufferIndex];
+			return_code = AlazarPostAsyncBuffer(boardHandle, pBuffer, bytesPerBuffer);
+			success = ParseError(return_code);
+		}
+		return success;
+	}
+	bool AlazarInfo::ReadCalibrationData(vector<double>& calib_data){
+		bool success=BeforeAsyncAcqusition(CHANNEL_B,1);
+		RETURN_CODE return_code;
+		if (success){
+			return_code = AlazarStartCapture(boardHandle);
+			success = ParseError(return_code);
+		}
+		U8* pBuffer=nullptr;
+		if (success){
+			DWORD timeout_ms = 5000;
+			pBuffer=bufferArray[0];
+			return_code = AlazarWaitAsyncBufferComplete(boardHandle, pBuffer, timeout_ms);
+			success = ParseError(return_code);
+			return_code = AlazarAbortAsyncRead(boardHandle);
+			success = ParseError(return_code);
+		}
+		if (!success){
+			cerr<<"Read Calib Data Failed!!"<<endl;
+		}
+		if (success){
+			calib_data.resize(bytesPerRecord);
+			for (int i=0;i<calib_data.size();i++){
+				calib_data[i] = 0;
+				for (int j = 0; j<calib_record_num; j++){
+					calib_data[i] += static_cast<double>(pBuffer[j*bytesPerRecord + i])/calib_record_num;
+				}
+			}
+			//save calibration data for other use
+			FILE* fpData = fopen("../../../Calibs.dat", "wb");
+			U8* pRecord = pBuffer;
+			for (U32 record = 0; (record < recordsPerBuffer) && (success == TRUE); record++){
+				size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
+				if (bytesWritten != bytesPerRecord){
+					success = false;
+				}
+				pRecord += samplesPerRecord;
+			}
+			fclose(fpData);
+		}
+		return success;
+	}
 }
