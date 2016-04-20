@@ -58,14 +58,13 @@ unsigned __stdcall ACQDATA(void* lpParam){
         U32 bufferIndex = 0;
 		U8* pBuffer=nullptr;
         FILE* fpData = fopen("../../../data.bin", "wb");
-		int acq_time=0;
         while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0 && success){
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
             return_code = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
             success = alazar->ParseError(return_code);
             if (success){
-				if (acq_time==0){
+				if (WaitForSingleObject(acq_param->save_buffer,0)==WAIT_OBJECT_0){
 					U8* pRecord = pBuffer;
 					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
 					    for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++){
@@ -75,7 +74,6 @@ unsigned __stdcall ACQDATA(void* lpParam){
 					    }
 					}
 				}
-				acq_time++;
 				if (WaitForSingleObject(_HEmptyGPUMem, 0) == WAIT_OBJECT_0){
                     cgl->SendDataToGPU(pBuffer);
                     WaitForSingleObject(_HMutex, INFINITE);

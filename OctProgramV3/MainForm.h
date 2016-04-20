@@ -121,11 +121,11 @@ namespace OCTProgram {
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::Label^  labelFPS;
 	private: System::Windows::Forms::ToolStripButton^  SaveDataButton;
-	private: System::Windows::Forms::ToolStripButton^  StopSaveButton;
-	private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator4;
+
+
 
 	private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator5;
-	private: System::Windows::Forms::ToolStripButton^  CalibButton;
+
 private: System::Windows::Forms::Label^  label3;
 private: System::Windows::Forms::Label^  label2;
 
@@ -161,11 +161,8 @@ private: System::Windows::Forms::Label^  label2;
 				 this->toolStripSeparator2 = (gcnew System::Windows::Forms::ToolStripSeparator());
 				 this->SaveDataButton = (gcnew System::Windows::Forms::ToolStripButton());
 				 this->toolStripSeparator3 = (gcnew System::Windows::Forms::ToolStripSeparator());
-				 this->StopSaveButton = (gcnew System::Windows::Forms::ToolStripButton());
-				 this->toolStripSeparator4 = (gcnew System::Windows::Forms::ToolStripSeparator());
 				 this->CapScrButton = (gcnew System::Windows::Forms::ToolStripButton());
 				 this->toolStripSeparator5 = (gcnew System::Windows::Forms::ToolStripSeparator());
-				 this->CalibButton = (gcnew System::Windows::Forms::ToolStripButton());
 				 this->groupBoxGradation = (gcnew System::Windows::Forms::GroupBox());
 				 this->label3 = (gcnew System::Windows::Forms::Label());
 				 this->label2 = (gcnew System::Windows::Forms::Label());
@@ -276,9 +273,8 @@ private: System::Windows::Forms::Label^  label2;
 				 // 
 				 // toolStrip1
 				 // 
-				 this->toolStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(11) {this->StartAcqBotton, this->toolStripSeparator1, 
-					 this->StopAcqBotton, this->toolStripSeparator2, this->SaveDataButton, this->toolStripSeparator3, this->StopSaveButton, this->toolStripSeparator4, 
-					 this->CapScrButton, this->toolStripSeparator5, this->CalibButton});
+				 this->toolStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(8) {this->StartAcqBotton, this->toolStripSeparator1, 
+					 this->StopAcqBotton, this->toolStripSeparator2, this->SaveDataButton, this->toolStripSeparator3, this->CapScrButton, this->toolStripSeparator5});
 				 this->toolStrip1->Location = System::Drawing::Point(0, 24);
 				 this->toolStrip1->Name = L"toolStrip1";
 				 this->toolStrip1->Size = System::Drawing::Size(992, 25);
@@ -327,20 +323,6 @@ private: System::Windows::Forms::Label^  label2;
 				 this->toolStripSeparator3->Name = L"toolStripSeparator3";
 				 this->toolStripSeparator3->Size = System::Drawing::Size(6, 25);
 				 // 
-				 // StopSaveButton
-				 // 
-				 this->StopSaveButton->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
-				 this->StopSaveButton->ImageTransparentColor = System::Drawing::Color::Magenta;
-				 this->StopSaveButton->Name = L"StopSaveButton";
-				 this->StopSaveButton->Size = System::Drawing::Size(23, 22);
-				 this->StopSaveButton->Text = L"StopSave";
-				 this->StopSaveButton->Click += gcnew System::EventHandler(this, &MainForm::StopSaveButton_Click);
-				 // 
-				 // toolStripSeparator4
-				 // 
-				 this->toolStripSeparator4->Name = L"toolStripSeparator4";
-				 this->toolStripSeparator4->Size = System::Drawing::Size(6, 25);
-				 // 
 				 // CapScrButton
 				 // 
 				 this->CapScrButton->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
@@ -354,15 +336,6 @@ private: System::Windows::Forms::Label^  label2;
 				 // 
 				 this->toolStripSeparator5->Name = L"toolStripSeparator5";
 				 this->toolStripSeparator5->Size = System::Drawing::Size(6, 25);
-				 // 
-				 // CalibButton
-				 // 
-				 this->CalibButton->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
-				 this->CalibButton->ImageTransparentColor = System::Drawing::Color::Magenta;
-				 this->CalibButton->Name = L"CalibButton";
-				 this->CalibButton->Size = System::Drawing::Size(23, 22);
-				 this->CalibButton->Text = L"CailbData";
-				 this->CalibButton->Click += gcnew System::EventHandler(this, &MainForm::CalibButton_Click);
 				 // 
 				 // groupBoxGradation
 				 // 
@@ -560,8 +533,7 @@ private: System::Windows::Forms::Label^  label2;
 				 this->StartAcqBotton->Enabled = true;
 			 }
 	private: System::Void toolStripCapScr_Click(System::Object^  sender, System::EventArgs^  e) {
-				 if (!cgl->CaptureScreen())
-				 {
+				 if (!cgl->CaptureScreen()){
 					 MessageBox::Show(L"Capture Screen Failure!");
 					 return;
 				 }
@@ -602,22 +574,9 @@ private: System::Windows::Forms::Label^  label2;
 				this->label3->Text=System::Convert::ToString(i2);
 			}
 	private: System::Void SaveDataButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 cgl->CaptureScreen();
-				 //adv->StartWaveOut();
-				 //MessageBox::Show(L"This botton is not used now!!");
-				 //WaitForSingleObject(_HMutex, INFINITE);
-				 //alazar->acqMode = 1;
-				 //ReleaseMutex(_HMutex);
-			 }
-	private: System::Void StopSaveButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 //adv->StopWaveOut();
-				 MessageBox::Show(L"This botton is not used now!!");
-				 //WaitForSingleObject(_HMutex, INFINITE);
-				 //alazar->acqMode = 0;
-				 //ReleaseMutex(_HMutex);
-			 }
-	private: System::Void CalibButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 MessageBox::Show(L"This botton is not used now!!");
+				 WaitForSingleObject(_HMutex,INFINITE);
+				 SetEvent(ap->save_buffer);
+				 ReleaseMutex(_HMutex);
 			 }
 	private: System::Void aboutToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 				 MessageBox::Show(L"This is a about form!", L"About");
@@ -626,7 +585,6 @@ private: System::Windows::Forms::Label^  label2;
 				 this->Close();
 			 }
 	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
-				 //render screen by timer1 in mainform
 				 labelFPS->Text = System::Convert::ToString(cgl->GetFPS());
 				 cgl->RenderScene();
 			 }
