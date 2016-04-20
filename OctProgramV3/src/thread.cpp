@@ -44,20 +44,22 @@ unsigned __stdcall ACQDATA(void* lpParam){
             continue;
         }
         ///////////////////////Acqusition Begin///////////////////////////
+		RETURN_CODE return_code;
         success=alazar->BeforeAsyncAcqusition(CHANNEL_A,-1);
         if (success){
 			success = adv->StartWaveOut();
         }
-        if (success)
-            retCode = AlazarStartCapture(alazar->boardHandle);
-            success=alazar->ParseError(retCode);
+		if (success){
+            return_code = AlazarStartCapture(alazar->boardHandle);
+            success=alazar->ParseError(return_code);
         }
         // Wait for each buffer to be filled, process the buffer, and re-post it to the board.
         DWORD timeout_ms = 5000;
         U32 bufferIndex = 0;
-        RETURN_CODE return_code;
-        fpData = fopen("../../../data.bin", "wb");
-        while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0&&success){
+		U8* pBuffer=nullptr;
+        FILE* fpData = fopen("../../../data.bin", "wb");
+		int acq_time=0;
+        while (WaitForSingleObject(acq_param->begin_acquisition, 0) == WAIT_OBJECT_0 && success){
             bufferIndex = bufferIndex % alazar->BUFFER_COUNT;
             pBuffer = alazar->bufferArray[bufferIndex];
             return_code = AlazarWaitAsyncBufferComplete(alazar->boardHandle, pBuffer, timeout_ms);
@@ -70,7 +72,6 @@ unsigned __stdcall ACQDATA(void* lpParam){
 					        size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
 					        if (bytesWritten != alazar->bytesPerRecord) success = false;
 					        pRecord += alazar->samplesPerRecord;
-					        savedBuffer++;
 					    }
 					}
 				}
@@ -92,7 +93,7 @@ unsigned __stdcall ACQDATA(void* lpParam){
         // Abort the acquisition
 		success = adv->StopWaveOut();
         return_code = AlazarAbortAsyncRead(alazar->boardHandle);
-        success&=alazar->ParseError(return_code);
+        success &= alazar->ParseError(return_code);
         if (fpData != NULL){
             fclose(fpData);
         }

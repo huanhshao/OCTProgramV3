@@ -77,4 +77,4 @@ inline T sqr(const T &x) {
 	return x*x;
 }
 void GetGaussianKernel(int n, double sigma, std::vector<double> &res);
-void GetCalibParams(U8* bufferdata,int n,int m,vector<int>& calib_params);
+void GetCalibParams(vector<double>& data,int n,int m,vector<int>& calib_params);

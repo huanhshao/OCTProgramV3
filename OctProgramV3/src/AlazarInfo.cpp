@@ -338,7 +338,7 @@ namespace OCTProgram{
 			FILE* fpData = fopen("../../../Calibs.dat", "wb");
 			U8* pRecord = pBuffer;
 			for (U32 record = 0; (record < recordsPerBuffer) && (success == TRUE); record++){
-				size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
+				size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), bytesPerRecord, fpData);
 				if (bytesWritten != bytesPerRecord){
 					success = false;
 				}
@@ -371,16 +371,17 @@ namespace OCTProgram{
 		if (success){
             for (int i=0;i<drift.size();i++){
                 drift[i]=0;
-                for (int j=0;j<recordPerBuffer;j++){
-                    drift[i]+=pBuffer[j*bytesPerRecord+calib_index[i]]
+				if (calib_index[i]<0) continue;
+                for (int j=0;j<recordsPerBuffer;j++){
+                    drift[i]+=pBuffer[j*bytesPerRecord+calib_index[i]];
                 }
-                drift[i]/=recordPerBuffer;
+                drift[i]/=recordsPerBuffer;
             }
 			//save drift data for other use
 			FILE* fpData = fopen("../../../Drifts.dat", "wb");
 			U8* pRecord = pBuffer;
 			for (U32 record = 0; (record < recordsPerBuffer) && (success == TRUE); record++){
-				size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), alazar->bytesPerRecord, fpData);
+				size_t bytesWritten = fwrite(pRecord, sizeof(BYTE), bytesPerRecord, fpData);
 				if (bytesWritten != bytesPerRecord){
 					success = false;
 				}
