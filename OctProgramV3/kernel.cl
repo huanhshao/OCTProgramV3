@@ -48,18 +48,30 @@ MyWriteImage(__write_only image2d_t img,float4 colors,uint gid,uint lid){
 	write_imagef(img,coord,color);
 }
 __kernel __attribute__((reqd_work_group_size (256,1,1))) void
-kfft(__global float* data,__write_only image2d_t img,float k,float a){
+kfft(__global uchar* data,int record_size,__global int* calibs,__global float* drift,
+float k,float a,__write_only image2d_t img){
 	uint gid=get_local_id(0);
 	uint lid=get_group_id(1);
 	gid=gid&0xffu;
 
 	__local float lds[2048];
-	__global float* gr=(__global float*)(data+gid+(lid*1024));
-	float2 in0=(float2)((float)gr[0*256],0);
-	float2 in1=(float2)((float)gr[1*256],0);
-	float2 in2=(float2)((float)gr[2*256],0);
-	float2 in3=(float2)((float)gr[3*256],0);
-
+	__global uchar* gr=(__global uchar*)(data+(lid*record_size));
+	int iid0=calibs[gid];
+	int iid1=calibs[gid+256];
+	int iid2=calibs[gid+512];
+	int iid3=calibs[gid+768];
+	float2 in0=(float2)(0,0);
+	float2 in1=(float2)(0,0);
+	float2 in2=(float2)(0,0);
+	float2 in3=(float2)(0,0);
+	if (iid0>0)
+		in0.x=(float)gr[iid0]-drift[gid];
+	if (iid1>0)
+		in1.x=(float)gr[iid1]-drift[gid+256];
+	if (iid2>0)
+		in2.x=(float)gr[iid2]-drift[gid+512];
+	if (iid3>0)
+		in3.x=(float)gr[iid3]-drift[gid+768];
 	uint ns=1;
 	uint kw=4;
 	uint i=0;
