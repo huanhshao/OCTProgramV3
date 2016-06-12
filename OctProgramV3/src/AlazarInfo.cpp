@@ -49,13 +49,14 @@ namespace OCTProgram{
 		}
 		if (success){
 			U32 bufferIndex=0;
+			U32 max_buffer_byte=bytesPerRecord*recordsPerBuffer*2;
 			for (bufferIndex = 0; (bufferIndex < BUFFER_COUNT) && (success == true); bufferIndex++){
 #ifdef _WIN32
 				bufferArray[bufferIndex] = static_cast<U8*>(
-					VirtualAlloc(NULL, bytesPerBuffer, MEM_COMMIT, PAGE_READWRITE)
+					VirtualAlloc(NULL, max_buffer_byte, MEM_COMMIT, PAGE_READWRITE)
 					);
 #else
-				bufferArray[bufferIndex] = static_cast<U8*>(malloc(bytesPerBuffer));
+				bufferArray[bufferIndex] = static_cast<U8*>(malloc(max_buffer_byte));
 #endif
 				if (bufferArray[bufferIndex] == NULL){
 					success = false;

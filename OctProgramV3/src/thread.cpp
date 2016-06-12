@@ -45,7 +45,8 @@ unsigned __stdcall ACQDATA(void* lpParam){
         }
         ///////////////////////Acqusition Begin///////////////////////////
 		RETURN_CODE return_code;
-        success=alazar->BeforeAsyncAcqusition(CHANNEL_A,-1);
+        //success=alazar->BeforeAsyncAcqusition(CHANNEL_A,-1);
+		success=alazar->BeforeAsyncAcqusition(CHANNEL_A|CHANNEL_B,-1);
         if (success){
 			success = adv->StartWaveOut();
         }

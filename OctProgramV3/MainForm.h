@@ -394,11 +394,11 @@ private: System::Windows::Forms::Label^  label2;
 				 // trackBar2
 				 // 
 				 this->trackBar2->Location = System::Drawing::Point(0, 57);
-				 this->trackBar2->Maximum = 70;
+				 this->trackBar2->Maximum = 200;
 				 this->trackBar2->Name = L"trackBar2";
 				 this->trackBar2->Size = System::Drawing::Size(208, 45);
 				 this->trackBar2->TabIndex = 1;
-				 this->trackBar2->Value = 40;
+				 this->trackBar2->Value = 140;
 				 this->trackBar2->Scroll += gcnew System::EventHandler(this, &MainForm::trackBar2_Scroll);
 				 // 
 				 // trackBar1
@@ -409,7 +409,7 @@ private: System::Windows::Forms::Label^  label2;
 				 this->trackBar1->Name = L"trackBar1";
 				 this->trackBar1->Size = System::Drawing::Size(208, 45);
 				 this->trackBar1->TabIndex = 0;
-				 this->trackBar1->Value = 85;
+				 this->trackBar1->Value = 100;
 				 this->trackBar1->Scroll += gcnew System::EventHandler(this, &MainForm::trackBar1_Scroll);
 				 // 
 				 // timer1
@@ -567,8 +567,8 @@ private: System::Windows::Forms::Label^  label2;
 				this->timer1->Enabled = tm1stat;
 			}
 	private:void SetColor(){
-				double i1=static_cast<double>(trackBar1->Value)/10-5;
-				double i2=static_cast<double>(trackBar2->Value+1)/10;
+				double i1=static_cast<double>(trackBar1->Value)/20;
+				double i2=static_cast<double>(trackBar2->Value)/20;
 				cgl->SetColorLevels(i1,i2);
 				this->label2->Text=System::Convert::ToString(i1);
 				this->label3->Text=System::Convert::ToString(i2);
