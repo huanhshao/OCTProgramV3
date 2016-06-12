@@ -11,6 +11,7 @@ public:
         begin_acquisition = CreateEvent(NULL, true, false, NULL);
         end_thread = CreateEvent(NULL, false, false, NULL);
         acquisition_running = CreateEvent(NULL, true, false, NULL);
+		save_buffer=CreateEvent(NULL,false,false,NULL);
         alazar = nullptr;
         clgl = nullptr;
 		adv=nullptr;
@@ -20,6 +21,7 @@ public:
         CloseHandle(begin_acquisition);
         CloseHandle(end_thread);
         CloseHandle(acquisition_running);
+		CloseHandle(save_buffer);
         end_thread = NULL;
         begin_acquisition = NULL;
         alazar = NULL;
@@ -39,6 +41,7 @@ public:
     HANDLE end_thread;
     HANDLE begin_acquisition;
     HANDLE acquisition_running;
+	HANDLE save_buffer;
 	OCTProgram::AlazarInfo* alazar;
 	OCTProgram::AdvInfo* adv;
 	OpenCLGLClass* clgl;
