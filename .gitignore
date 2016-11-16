@@ -2,6 +2,7 @@ debug/
 release/
 OctprogramV3/debug/
 OctprogramV3/release/
+*.tex
 *.txt
 *.ini
 *.bas
