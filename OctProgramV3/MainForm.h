@@ -46,6 +46,7 @@ namespace OCTProgram {
 			pp = new ProcessParam;
 			pp->clgl = cgl;
 			pp->thread_handle = (HANDLE)_beginthreadex(NULL, 0, &PROCESSDATA, pp, 0, NULL);
+			tex_save_id=0;
 		}
 
 	protected:
@@ -112,6 +113,7 @@ namespace OCTProgram {
 		AdvInfo* adv;
 		AcqParam* ap;
 		ProcessParam* pp;
+		int tex_save_id;
 
 	private: System::Windows::Forms::ToolStripMenuItem^  exitToolStripMenuItem;
 	private: System::Windows::Forms::DataVisualization::Charting::Chart^  chart1;
@@ -517,6 +519,7 @@ private: System::Windows::Forms::Label^  label2;
 				 ReleaseMutex(_HMutex);
 				 this->²Ëµ¥ToolStripMenuItem->Enabled = false;
 				 this->StartAcqBotton->Enabled = false;
+				 tex_save_id=0;
 			 }
 	private: System::Void StopAcqBotton_Click(System::Object^  sender, System::EventArgs^  e) {
 				 WaitForSingleObject(_HMutex, INFINITE);
@@ -578,9 +581,13 @@ private: System::Windows::Forms::Label^  label2;
 				this->label3->Text=System::Convert::ToString(i2);
 			}
 	private: System::Void SaveDataButton_Click(System::Object^  sender, System::EventArgs^  e) {
-				 WaitForSingleObject(_HMutex,INFINITE);
-				 SetEvent(ap->save_buffer);
-				 ReleaseMutex(_HMutex);
+				 bool timer_state=this->timer1->Enabled;
+				 this->timer1->Enabled=false;
+				 //WaitForSingleObject(_HMutex,INFINITE);
+				 cgl->SaveTexture(tex_save_id++);
+				 //SetEvent(ap->save_buffer);
+				 //ReleaseMutex(_HMutex);
+				 this->timer1->Enabled=timer_state;
 			 }
 	private: System::Void aboutToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 				 MessageBox::Show(L"This is a about form!", L"About");

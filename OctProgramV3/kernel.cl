@@ -49,7 +49,7 @@ MyWriteImage(__write_only image2d_t img,float4 colors,uint gid,uint lid){
 }
 __kernel __attribute__((reqd_work_group_size (256,1,1))) void
 kfft(__global uchar* data,int record_size,__global int* calibs,__global float* drift,
-float k,float a,__write_only image2d_t img){
+float k,float a,__write_only image2d_t img,__global char* outs){
 	uint gid=get_local_id(0);
 	uint lid=get_group_id(1);
 	gid=gid&0xffu;
@@ -145,6 +145,11 @@ float k,float a,__write_only image2d_t img){
 	//float4 colors=(float4)(0.0,0.33,0.66,1.0);
 	if ((gid+256*3) < get_image_width(img) && (lid) < get_image_height(img)){
 		MyWriteImage(img,colors,gid,lid);
+		uint all_ids=lid*get_image_width(img)+gid;
+		outs[all_ids+256*0]=colors.x*255;
+		outs[all_ids+256*1]=colors.y*255;
+		outs[all_ids+256*2]=colors.z*255;
+		outs[all_ids+256*3]=colors.w*255;
 	}
 }
 __kernel __attribute__((reqd_work_group_size (256,1,1))) void

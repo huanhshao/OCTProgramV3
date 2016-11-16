@@ -61,6 +61,7 @@ public:
 	void BindGLTexture(GLuint front,GLuint back);
 	void WriteCalib(vector<int>& calib_indexs);
     void WriteDrift(vector<float>& drifts);
+	void SaveTexture(int id);
 private:
 	int InitCL();
 	int InitCLFromGL();		//Must use after a GL texture created
@@ -85,6 +86,9 @@ private:
 	//data param
 	cl_mem cl_calib_mem;
     cl_mem cl_drift_mem;
+	//buffer
+	cl_mem cl_image_mem_back_;
+	cl_mem cl_image_mem_front_;
 };
 class OpenCLGLClass{
 public:
@@ -108,6 +112,7 @@ public:
     void EmptyToFull();
 	void WriteCalibIndex(vector<int>& calib_index);
     void WriteDriftData(vector<float>& drift);
+	void SaveTexture(int id){mcl.SaveTexture(id);}
 private:
 	void ReleaseMem();
 	void ClearQueue(std::queue<memStat*> mem_queue);

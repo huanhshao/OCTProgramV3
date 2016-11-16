@@ -34,18 +34,18 @@ namespace OCTProgram{
 	}
 	bool AlazarInfo::ConfigureBoard(char* cfgParaDir){
 		DeleteBuffer();
-		if (!GetCfgParam(cfgParaDir))
+		if (!GetCfgParam(cfgParaDir)){
+			cout<<"Bad Config Files!!"<<endl;
 			return false;
+		}
 		bool success=true;
 		bufferArray = new U8*[BUFFER_COUNT];
 		boardHandle = AlazarGetBoardBySystemID(systemId, boardId);
 		RETURN_CODE return_code=CfgBoard4Para();
-		if (return_code!=ApiSuccess)
-			success=false;
+		success=ParseError(return_code);
 		if (success){
 			return_code=GetAcqParam();
-			if (return_code!=ApiSuccess)
-				success=false;
+			success=ParseError(return_code);
 		}
 		if (success){
 			U32 bufferIndex=0;
@@ -62,8 +62,10 @@ namespace OCTProgram{
 					success = false;
 				}
 			}
-			if (!success)
+			if (!success){
+				cerr<<"Failed to malloc mem!!"<<endl;
 				return false;
+			}
 		}
 		return success;
 	}
@@ -129,9 +131,9 @@ namespace OCTProgram{
 		calib_start_index=section["start_index"].asInt();
 		calib_end_index=section["end_index"].asInt();
 		calib_record_num=section["record_num_in_use"].asInt();
+		return true;
 	}
-	void AlazarInfo::SetChannalMask(int channalID)
-	{
+	void AlazarInfo::SetChannalMask(int channalID){
 		inputChannel=channalID;
 		GetAcqParam();
 	}

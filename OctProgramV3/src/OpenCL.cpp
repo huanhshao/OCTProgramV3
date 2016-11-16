@@ -4,10 +4,10 @@
 
 //#pragma OPENCL EXTENSION cl_khr_gl_event : enable
 OpenCL::OpenCL(){
-	clTexMemFront=NULL;
-	clTexMemBack=NULL;
+	clTexMemFront=clTexMemBack=NULL;
 	cl_calib_mem=NULL;
     cl_drift_mem=NULL;
+	cl_image_mem_front_=cl_image_mem_back_=NULL;
 	k=0.1;
 	a=10;
 }
@@ -26,11 +26,22 @@ void OpenCL::BindGLTexture(GLuint front,GLuint back){
 		context,CL_MEM_READ_WRITE,GL_TEXTURE_2D,0,front,&err);
 	clTexMemBack=clCreateFromGLTexture2D(
 		context,CL_MEM_READ_WRITE,GL_TEXTURE_2D,0,back,&err);
+	int w=0,h=0;
+	clGetImageInfo(clTexMemFront,CL_IMAGE_WIDTH,sizeof(int),&w,NULL);
+	clGetImageInfo(clTexMemFront,CL_IMAGE_HEIGHT,sizeof(int),&h,NULL);
+	ReleaseMem(cl_image_mem_back_);
+	ReleaseMem(cl_image_mem_front_);
+	cl_image_mem_back_=GenMem(w,h,sizeof(cl_char));
+	cl_image_mem_front_=GenMem(w,h,sizeof(cl_char));
+	cout<<w<<h<<endl;
 }
 OpenCL::~OpenCL(){
 	clReleaseMemObject(clTexMemFront);
 	clReleaseMemObject(clTexMemBack);
 	clReleaseMemObject(cl_calib_mem);
+	clReleaseMemObject(cl_drift_mem);
+	clReleaseMemObject(cl_image_mem_back_);
+	clReleaseMemObject(cl_image_mem_front_);
 	if (kfft) clReleaseKernel(kfft);
 	if (hist) clReleaseKernel(hist);
 	if (program!=0) clReleaseProgram(program);
@@ -120,6 +131,23 @@ int OpenCL::CheckofPow2(int n){
 		return m;
 	}
 }
+void OpenCL::SaveTexture(int id){
+	int w=0,h=0;
+	clGetImageInfo(clTexMemBack,CL_IMAGE_WIDTH,sizeof(int),&w,NULL);
+	clGetImageInfo(clTexMemBack,CL_IMAGE_HEIGHT,sizeof(int),&h,NULL);
+	char* ptr=new char[w*h];
+	WaitForSingleObject(_HMutex,INFINITE);
+	clEnqueueReadBuffer(queue,cl_image_mem_front_,CL_TRUE,0,w*h,ptr,0,NULL,NULL);
+	ReleaseMutex(_HMutex);
+	time_t t=time(0);
+	char tmp[64];
+	strftime(tmp,sizeof(tmp),"%Y_%m_%d_%H_%M_%S",localtime(&t));
+	stringstream ss;ss<<"Texture\\"<<id<<'_'<<std::string(tmp)<<".tex";
+	string filename;ss>>filename;
+	std::ofstream ofs(filename,std::ios::out|std::ios::binary);
+	ofs.write((const char*)ptr,w*h);
+	delete[] ptr;
+}
 int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count){
 	AcquireTex();
 	gws[0]=256;
@@ -134,6 +162,7 @@ int OpenCL::EnqueueCalFFT(memStat* pms,int n,int m,int count){
 	clSetKernelArg(kfft, 4, sizeof(cl_float), (void *)&k);
 	clSetKernelArg(kfft, 5, sizeof(cl_float), (void *)&a);
     clSetKernelArg(kfft, 6, sizeof(cl_mem), (void *)&clTexMemBack);
+	clSetKernelArg(kfft,7,sizeof(cl_mem), (void*)&cl_image_mem_back_);
 	ReleaseMutex(_HMutex);
 	cl_event fftEvent;
 	clEnqueueNDRangeKernel(queue, kfft, 2, NULL, gws, lws, 1, &pms->writeEvent, &fftEvent);
@@ -168,6 +197,9 @@ void OpenCL::SwapTexMem(){
 	tmp=clTexMemBack;
 	clTexMemBack=clTexMemFront;
 	clTexMemFront=tmp;
+	tmp=cl_image_mem_back_;
+	cl_image_mem_back_=cl_image_mem_front_;
+	cl_image_mem_front_=tmp;
 }
 void OpenCL::AcquireTex(){
 	clEnqueueAcquireGLObjects(queue,1,&clTexMemBack,0,NULL,NULL);

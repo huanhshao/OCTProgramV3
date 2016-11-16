@@ -107,6 +107,7 @@ void OpenGL::ViewPort(int x, int y, int width, int height)
 	gluLookAt(4,1.8,8.3,4,1.8,0,0,1,0);
 	RenderScene();
 }
+
 void OpenGL::RenderScene(){
 	//h is fixed to 4, and w be count the same ratio.
 	//float w=8/static_cast<double>(texHeight)*texWidth*0.9;
@@ -138,6 +139,7 @@ void OpenGL::RenderScene(){
 	glPopMatrix();
 	SwapBuffers(m_hDC);
 }
+
 bool OpenGL::CaptureScreen(){
 	GLint viewport[4]; 
 	glGetIntegerv( GL_VIEWPORT, viewport ); 
