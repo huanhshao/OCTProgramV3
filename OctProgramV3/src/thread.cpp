@@ -47,12 +47,11 @@ unsigned __stdcall ACQDATA(void* lpParam){
 		RETURN_CODE return_code;
         //success=alazar->BeforeAsyncAcqusition(CHANNEL_A,-1);
 		success=alazar->BeforeAsyncAcqusition(CHANNEL_A|CHANNEL_B,-1);
-        if (success){
-			success = adv->StartWaveOut();
-        }
+		success|=adv->PrepareStartWave();
 		if (success){
             return_code = AlazarStartCapture(alazar->boardHandle);
-            success=alazar->ParseError(return_code);
+			success = adv->StartWaveOut();
+			success |= alazar->ParseError(return_code);
         }
         // Wait for each buffer to be filled, process the buffer, and re-post it to the board.
         DWORD timeout_ms = 5000;

@@ -557,6 +557,10 @@ private: System::Windows::Forms::Label^  label2;
 				bool tm1stat = this->timer1->Enabled;
 				this->timer1->Enabled = false;
 				cgl->CalHistogram(hst);
+				int total_pixels=0;
+				for (int i=0;i<256;i++) total_pixels+=hst[i];
+				total_pixels/=256;
+				for (int i=0;i<256;i++) if (hst[i]>total_pixels) hst[i]=total_pixels;
 				this->chart1->Series->Clear();
 				System::Windows::Forms::DataVisualization::Charting::Series^ series =
 					gcnew System::Windows::Forms::DataVisualization::Charting::Series();

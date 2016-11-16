@@ -27,6 +27,7 @@ namespace OCTProgram{
 		~AdvInfo();
 		void SetSignal(double mag,double off,int pd,int channel=0);
 		bool StartWaveOut();
+		bool PrepareStartWave();
 		bool StopWaveOut();
 	private:
 		void InitCard();

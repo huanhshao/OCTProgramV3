@@ -329,12 +329,31 @@ namespace OCTProgram{
 			cerr<<"Read Calib Data Failed!!"<<endl;
 		}
 		if (success){
+			double lesssum=999999999;
+			int count=1;
 			for (int i=0;i<calib_data.size();i++){
-				calib_data[i] = 0;
-				for (int j = 0; j<calib_record_num; j++){
-					calib_data[i] += static_cast<double>(pBuffer[j*bytesPerRecord + i])/calib_record_num;
+				calib_data[i] = static_cast<double>(pBuffer[i]);
+			}
+			for (int j = 1; j<calib_record_num; j++){
+				double tmpsum=0;
+				double dd=0;
+				for (int i=0;i<bytesPerRecord;i++){
+					dd=(pBuffer[j*bytesPerRecord+i]-pBuffer[i]);
+					tmpsum+=dd*dd;
+				}
+				tmpsum/=bytesPerRecord;
+				if (tmpsum>lesssum*1.5) continue;
+				if (lesssum>tmpsum) lesssum=tmpsum;
+				if (lesssum<150) lesssum=150;
+				count++;
+				for (int i=0;i<calib_data.size();i++){
+					calib_data[i] += static_cast<double>(pBuffer[j*bytesPerRecord + i]);
 				}
 			}
+			for (int i=0;i<calib_data.size();i++){
+				calib_data[i]/=count;
+			}
+			cout<<"ALL "<<count<<" used in calibration."<<endl;
 			//save calibration data for other use
 			FILE* fpData = fopen("../../../Calibs.dat", "wb");
 			U8* pRecord = pBuffer;

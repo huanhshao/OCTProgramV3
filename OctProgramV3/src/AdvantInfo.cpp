@@ -48,14 +48,13 @@ namespace OCTProgram{
 			DRV_DeviceClose((LONG far *)&driver_handle_);
 		}
 	}
-	bool AdvInfo::StartWaveOut(){
-		//return true;
+	bool AdvInfo::PrepareStartWave(){
 		if (globle_mem_out_handle_==NULL||globle_mem_out_==nullptr){
 			cout<<"ERROR!!Can't Find Data Buffer!!"<<endl;
 			return false;
 		}
 		pt_FAO_waveform_start_.TrigSrc			= 1;			// external trigger
-		pt_FAO_waveform_start_.SampleRate		= 100000;		// pacer rate I think is useless
+		pt_FAO_waveform_start_.SampleRate		= 1000000;		// pacer rate I think is useless
 		pt_FAO_waveform_start_.Count			= wave_channel_x_.period*enalbed_channel_count_;
 		pt_FAO_waveform_start_.WaveCount		= 0xFFFFFFFF;	// infinite
 		pt_FAO_waveform_start_.Buffer			= (USHORT far *)globle_mem_out_;
@@ -64,6 +63,8 @@ namespace OCTProgram{
 			cout<<"It's streaming!!! Can't open another stream!"<<endl;
 			return false;
 		}
+	}
+	bool AdvInfo::StartWaveOut(){
 		DWORD dwErrCde= DRV_FAOWaveFormStart(driver_handle_,(LPT_FAOWaveFormStart)&pt_FAO_waveform_start_);
 		if (dwErrCde != SUCCESS){
 			ErrorHandler(dwErrCde);
