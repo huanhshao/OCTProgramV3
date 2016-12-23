@@ -89,16 +89,19 @@ namespace OCTProgram{
 		return success;
 	}
 	void AdvInfo::SetSignal(double mag,double off,int pd,int channel){
-		switch(channel){
+		/*switch(channel){
 		case 0:
-			wave_channel_x_.Set(WAVE_TRIANGLE,mag,off,pd*2);
-			break;
+			wave_channel_x_.Set(WAVE_TRIANGLE,mag,off,pd);
+			//break;
 		case 1:
 			wave_channel_y_.Set(WAVE_TRIANGLE,mag,off,pd);
 			break;
 		default:
 			break;
 		}
+		*/
+		wave_channel_x_.Set(WAVE_TRIANGLE,mag,off,pd);
+		wave_channel_y_.Set(WAVE_SWITCH,2,2,pd);
 		GenerateBufferData();
 	}
 	void AdvInfo::GenerateBufferData(){
@@ -148,16 +151,17 @@ namespace OCTProgram{
 			}
 		case WAVE_TRIANGLE:
 			{
-				int upside_time = static_cast<int>(sw.period*upside_rate_);
+				int upside_time = static_cast<int>(sw.period/2*upside_rate_);
 				float upslope = sw.magnitude * 2.0f / (float)(upside_time);
-				float dnslope = sw.magnitude * 2.0f / (float)(sw.period-upside_time);
-				for (int i = 0; i < sw.period; i++){
+				float dnslope = sw.magnitude * 2.0f / (float)(sw.period/2-upside_time);
+				for (int i = 0; i < sw.period/2; i++){
 					if (i <= upside_time){
 						buf[i] = upslope * i - sw.magnitude + sw.offset;
 					}
 					else{
-						buf[i] = dnslope * (sw.period-i) - sw.magnitude + sw.offset;
+						buf[i] = dnslope * (sw.period/2-i) - sw.magnitude + sw.offset;
 					}
+					buf[i+sw.period/2]=buf[i];
 				}
 				break;
 			}
@@ -165,6 +169,16 @@ namespace OCTProgram{
 		case SINE_TRIANGLE:
 		//I don't support this two waveform in my program
 			break;
+		case WAVE_SWITCH:
+			{
+				float high_level=sw.magnitude+sw.offset, low_level=sw.offset-sw.magnitude;
+				int half_p=sw.period/2;
+				for (int i=0;i<sw.period;i++){
+					if (i<half_p) buf[i]=high_level;
+					else buf[i]=low_level;
+				}
+				break;
+			}
 		default:
 			break;
 		}
@@ -176,8 +190,8 @@ namespace OCTProgram{
 			globle_mem_out_handle_=NULL;
 		}
 		//NOTE: if you use two channel, their period must be the same!!!
-		int data_size=max(bufs[0].size(),bufs[1].size())*enalbed_channel_count_;
-		size_t mem_size=data_size*sizeof(USHORT);
+		int data_size=max(bufs[0].size(),bufs[1].size());//*enalbed_channel_count_;
+		size_t mem_size=data_size*sizeof(USHORT)*enalbed_channel_count_;
 		if (mem_size==0) return;
 		if ((globle_mem_out_handle_ = (USHORT far *)GlobalAlloc(GHND, mem_size)) == NULL){
 			cout<<"Unable to alloc memery!!"<<endl;
@@ -188,15 +202,21 @@ namespace OCTProgram{
 			globle_mem_out_handle_=NULL;
 		}
 		int count=0;
-		for (int i=0;i<bufs[0].size();i++){
+		for (int i=0;i<data_size;i++){
 			if(enabled_channel_ & ADV_CHANNEL0){
-				globle_mem_out_[count++] = bufs[0][i] & 0x0fff;
+				//if (i<bufs[0].size())
+					globle_mem_out_[count++] = bufs[0][i] & 0x0fff;
+				//else
+					//globle_mem_out_[count++] = 0;
 			}
 			if(enabled_channel_ & ADV_CHANNEL1){
-				globle_mem_out_[count++] = (bufs[1][i] | ( 0x01 << 12)) & 0x3fff;
+				//if (i<bufs[1].size())
+					globle_mem_out_[count++] = (bufs[1][i] | ( 0x01 << 12)) & 0x3fff;
+				//else
+					//globle_mem_out_[count++] = (0 | ( 0x01 << 12)) & 0x3fff;
 			}
 		}
-		if (count!=data_size){
+		if (count!=data_size*enalbed_channel_count_){
 			cout<<"There must be something wrong in writing memery!!"<<endl;
 		}
 	}

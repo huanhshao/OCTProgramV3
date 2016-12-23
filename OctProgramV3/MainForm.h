@@ -34,6 +34,7 @@ namespace OCTProgram {
 			int w = 1024;
 			int h = 1000;
 			adv->SetSignal(1.0,0.0,h);
+			//adv->SetSignal(1.0,0.0,h,1);
 			cgl->Initialize(dc, w, h);
 			cgl->SetViewPort(0, 0, this->ClientSize.Width, this->ClientSize.Height);
 			cgl->RenderScene();
@@ -130,6 +131,7 @@ namespace OCTProgram {
 
 private: System::Windows::Forms::Label^  label3;
 private: System::Windows::Forms::Label^  label2;
+private: System::Windows::Forms::Timer^  timer2;
 
 
 
@@ -174,6 +176,7 @@ private: System::Windows::Forms::Label^  label2;
 				 this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
 				 this->label1 = (gcnew System::Windows::Forms::Label());
 				 this->labelFPS = (gcnew System::Windows::Forms::Label());
+				 this->timer2 = (gcnew System::Windows::Forms::Timer(this->components));
 				 this->menuStrip1->SuspendLayout();
 				 this->toolStrip1->SuspendLayout();
 				 this->groupBoxGradation->SuspendLayout();
@@ -438,6 +441,11 @@ private: System::Windows::Forms::Label^  label2;
 				 this->labelFPS->Text = L"0";
 				 this->labelFPS->Visible = false;
 				 // 
+				 // timer2
+				 // 
+				 this->timer2->Interval = 50;
+				 this->timer2->Tick += gcnew System::EventHandler(this, &MainForm::timer2_Tick);
+				 // 
 				 // MainForm
 				 // 
 				 this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
@@ -581,13 +589,14 @@ private: System::Windows::Forms::Label^  label2;
 				this->label3->Text=System::Convert::ToString(i2);
 			}
 	private: System::Void SaveDataButton_Click(System::Object^  sender, System::EventArgs^  e) {
+				 //this->timer2->Enabled=true;/*
 				 bool timer_state=this->timer1->Enabled;
 				 this->timer1->Enabled=false;
-				 //WaitForSingleObject(_HMutex,INFINITE);
-				 cgl->SaveTexture(tex_save_id++);
-				 //SetEvent(ap->save_buffer);
-				 //ReleaseMutex(_HMutex);
+				 WaitForSingleObject(_HMutex,INFINITE);
+				 SetEvent(ap->save_buffer);
+				 ReleaseMutex(_HMutex);
 				 this->timer1->Enabled=timer_state;
+				 //*/
 			 }
 	private: System::Void aboutToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 				 MessageBox::Show(L"This is a about form!", L"About");
@@ -599,5 +608,19 @@ private: System::Windows::Forms::Label^  label2;
 				 labelFPS->Text = System::Convert::ToString(cgl->GetFPS());
 				 cgl->RenderScene();
 			 }
-	};
+	private: System::Void timer2_Tick(System::Object^  sender, System::EventArgs^  e) {
+				 if (this->tex_save_id>=200){
+					 this->timer2->Enabled=false;
+					 this->tex_save_id=0;
+					 return;
+				 }
+				 bool timer_state=this->timer1->Enabled;
+				 this->timer1->Enabled=false;
+				 //WaitForSingleObject(_HMutex,INFINITE);
+				 cgl->SaveTexture(tex_save_id++);
+				 //SetEvent(ap->save_buffer);
+				 //ReleaseMutex(_HMutex);
+				 this->timer1->Enabled=timer_state;
+			 }
+};
 }

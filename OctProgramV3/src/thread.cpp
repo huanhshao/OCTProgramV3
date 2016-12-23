@@ -65,6 +65,7 @@ unsigned __stdcall ACQDATA(void* lpParam){
             success = alazar->ParseError(return_code);
             if (success){
 				if (WaitForSingleObject(acq_param->save_buffer,0)==WAIT_OBJECT_0){
+					cout<<"Write buffers!!"<<endl;
 					U8* pRecord = pBuffer;
 					for (int channel = 0; (channel < alazar->channelCount) && (success == true); channel++){
 					    for (U32 record = 0; (record < alazar->recordsPerBuffer) && (success == true); record++){

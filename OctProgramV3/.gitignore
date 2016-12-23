@@ -1,0 +1,6 @@
+Debug/*
+Release/*
+*.vcxproj*
+*.exe
+*.filters
+Texture/*

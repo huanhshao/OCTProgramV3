@@ -8,7 +8,7 @@ OpenCLGLClass::OpenCLGLClass(){
 	BUFFERCOUNT=2;
 	time=0;
 	switchCount=0;
-	FPS=100000;
+	FPS=4000;
 	minLev=0;
 	maxLev=255;
 }

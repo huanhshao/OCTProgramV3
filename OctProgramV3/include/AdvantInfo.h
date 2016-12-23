@@ -3,7 +3,7 @@
 #include "api/Advantech/Driver.h"
 
 namespace OCTProgram{
-	enum WAVE_TYPE { WAVE_SINE = 0, WAVE_TRIANGLE, WAVE_SQUARE, SINE_TRIANGLE, NO_WAVE };
+	enum WAVE_TYPE { WAVE_SINE = 0, WAVE_TRIANGLE, WAVE_SQUARE, SINE_TRIANGLE, WAVE_SWITCH , NO_WAVE };
 	typedef struct _SWAVE{
 		WAVE_TYPE waveform;
 		float magnitude;

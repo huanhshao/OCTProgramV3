@@ -9,3 +9,5 @@ OctprogramV3/release/
 *.pas
 *.dll
 *.lib
+*.sln
+*.suo
