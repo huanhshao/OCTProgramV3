@@ -145,7 +145,7 @@ private: System::Windows::Forms::Timer^  timer2;
 			 void InitializeComponent(void)
 			 {
 				 this->components = (gcnew System::ComponentModel::Container());
-				 System::Windows::Forms::DataVisualization::Charting::ChartArea^  chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+				 System::Windows::Forms::DataVisualization::Charting::ChartArea^  chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
 				 this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 				 this->²Ëµ¥ToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 				 this->ConfigrationToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -381,15 +381,15 @@ private: System::Windows::Forms::Timer^  timer2;
 				 // 
 				 // chart1
 				 // 
-				 chartArea1->AxisX->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
-				 chartArea1->AxisX2->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
-				 chartArea1->AxisY->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
-				 chartArea1->AxisY2->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
-				 chartArea1->Name = L"ChartArea1";
-				 chartArea1->Position->Auto = false;
-				 chartArea1->Position->Height = 100;
-				 chartArea1->Position->Width = 100;
-				 this->chart1->ChartAreas->Add(chartArea1);
+				 chartArea2->AxisX->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
+				 chartArea2->AxisX2->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
+				 chartArea2->AxisY->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
+				 chartArea2->AxisY2->Enabled = System::Windows::Forms::DataVisualization::Charting::AxisEnabled::False;
+				 chartArea2->Name = L"ChartArea1";
+				 chartArea2->Position->Auto = false;
+				 chartArea2->Position->Height = 100;
+				 chartArea2->Position->Width = 100;
+				 this->chart1->ChartAreas->Add(chartArea2);
 				 this->chart1->Location = System::Drawing::Point(214, 32);
 				 this->chart1->Name = L"chart1";
 				 this->chart1->Size = System::Drawing::Size(182, 59);
@@ -622,5 +622,6 @@ private: System::Windows::Forms::Timer^  timer2;
 				 //ReleaseMutex(_HMutex);
 				 this->timer1->Enabled=timer_state;
 			 }
+
 };
 }

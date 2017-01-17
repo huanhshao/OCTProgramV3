@@ -55,7 +55,7 @@ namespace OCTProgram{
 		}
 		pt_FAO_waveform_start_.TrigSrc			= 1;			// external trigger
 		pt_FAO_waveform_start_.SampleRate		= 1000000;		// pacer rate I think is useless
-		pt_FAO_waveform_start_.Count			= wave_channel_x_.period*enalbed_channel_count_;
+		pt_FAO_waveform_start_.Count			= wave_property_[0].period*enalbed_channel_count_;
 		pt_FAO_waveform_start_.WaveCount		= 0xFFFFFFFF;	// infinite
 		pt_FAO_waveform_start_.Buffer			= (USHORT far *)globle_mem_out_;
 		pt_FAO_waveform_start_.EnabledChannel	= enabled_channel_;
@@ -100,26 +100,27 @@ namespace OCTProgram{
 			break;
 		}
 		*/
-		wave_channel_x_.Set(WAVE_TRIANGLE,mag,off,pd);
-		wave_channel_y_.Set(WAVE_SWITCH,2,2,pd);
+		int total_used_channel=4;
+		upside_rate_=0.5;
+		wave_property_.resize(total_used_channel);
+		wave_property_[0].Set(WAVE_TRIANGLE,1,0,pd*2/total_used_channel);
+		wave_property_[1].Set(WAVE_TRIANGLE,-1.5,-0.5,pd*2/total_used_channel);
+		wave_property_[2].Set(WAVE_SQUARE,2,2,pd*2/total_used_channel);
+		wave_property_[3].Set(WAVE_SINE,0,0,pd*2/total_used_channel);
 		GenerateBufferData();
 	}
 	void AdvInfo::GenerateBufferData(){
 		enabled_channel_=0;
 		enalbed_channel_count_=0;
 		vector<float> voltage_buffer;
-		vector<vector<USHORT>> binary_buffer(2);
-		if(wave_channel_x_.waveform!= NO_WAVE){
-			enabled_channel_ |= ADV_CHANNEL0;
-			enalbed_channel_count_++;
-			SetRealBuffer(wave_channel_x_,voltage_buffer);
-			ScaleVoltage(voltage_buffer,binary_buffer[0],0);
-		}
-		if(wave_channel_y_.waveform!=NO_WAVE){
-			enabled_channel_ |= ADV_CHANNEL1;
-			enalbed_channel_count_++;
-			SetRealBuffer(wave_channel_y_,voltage_buffer);
-			ScaleVoltage(voltage_buffer,binary_buffer[1],1);
+		vector<vector<USHORT>> binary_buffer(wave_property_.size());
+		for (int i=0;i<wave_property_.size();i++){
+			if (wave_property_[i].waveform!=NO_WAVE){
+				enalbed_channel_count_++;
+				enabled_channel_|=(1<<i);
+				SetRealBuffer(wave_property_[i],voltage_buffer);
+				ScaleVoltage(voltage_buffer,binary_buffer[i],i);
+			}
 		}
 		SetMultiToOneBuffer(binary_buffer);
 	}
@@ -142,7 +143,7 @@ namespace OCTProgram{
 		switch (sw.waveform){
 		case WAVE_SINE://to test use
 			{
-				for (int i = 0; i < sw.period; i ++){
+				for (int i = 0; i < sw.period; i++){
 					buf[i] = static_cast<float>(sw.magnitude
 						* sin(2*PI*(double)i/(double)sw.period)
 						+ sw.offset);
@@ -150,6 +151,21 @@ namespace OCTProgram{
 				break;
 			}
 		case WAVE_TRIANGLE:
+			{
+				int upside_time = static_cast<int>(sw.period*upside_rate_);
+				float upslope = sw.magnitude * 2.0f / (float)(upside_time);
+				float dnslope = sw.magnitude * 2.0f / (float)(sw.period-upside_time);
+				for (int i = 0; i < sw.period; i++){
+					if (i <= upside_time){
+						buf[i] = upslope * i - sw.magnitude + sw.offset;
+					}
+					else{
+						buf[i] = dnslope * (sw.period-i) - sw.magnitude + sw.offset;
+					}
+				}
+				break;
+			}
+		case WAVE_TRIANGLE_2:
 			{
 				int upside_time = static_cast<int>(sw.period/2*upside_rate_);
 				float upslope = sw.magnitude * 2.0f / (float)(upside_time);
@@ -165,11 +181,11 @@ namespace OCTProgram{
 				}
 				break;
 			}
-		case WAVE_SQUARE:
 		case SINE_TRIANGLE:
 		//I don't support this two waveform in my program
 			break;
 		case WAVE_SWITCH:
+		case WAVE_SQUARE:
 			{
 				float high_level=sw.magnitude+sw.offset, low_level=sw.offset-sw.magnitude;
 				int half_p=sw.period/2;
@@ -190,30 +206,34 @@ namespace OCTProgram{
 			globle_mem_out_handle_=NULL;
 		}
 		//NOTE: if you use two channel, their period must be the same!!!
-		int data_size=max(bufs[0].size(),bufs[1].size());//*enalbed_channel_count_;
+		if (bufs.size()==0) return;
+		int data_size=bufs[0].size();
+		for (int i=0;i<4;i++) if (data_size<bufs[i].size()) data_size=bufs[i].size();
 		size_t mem_size=data_size*sizeof(USHORT)*enalbed_channel_count_;
 		if (mem_size==0) return;
 		if ((globle_mem_out_handle_ = (USHORT far *)GlobalAlloc(GHND, mem_size)) == NULL){
 			cout<<"Unable to alloc memery!!"<<endl;
+			return;
 		}
 		if((globle_mem_out_ = (USHORT far *)GlobalLock(globle_mem_out_handle_)) == nullptr){
 			cout<<"Unable to alloc memery!!"<<endl;
 			GlobalFree(globle_mem_out_handle_);
 			globle_mem_out_handle_=NULL;
+			return;
 		}
 		int count=0;
 		for (int i=0;i<data_size;i++){
 			if(enabled_channel_ & ADV_CHANNEL0){
-				//if (i<bufs[0].size())
-					globle_mem_out_[count++] = bufs[0][i] & 0x0fff;
-				//else
-					//globle_mem_out_[count++] = 0;
+				globle_mem_out_[count++] = (bufs[0][i] | ( 0x00 << 12)) & 0x0fff;
 			}
 			if(enabled_channel_ & ADV_CHANNEL1){
-				//if (i<bufs[1].size())
-					globle_mem_out_[count++] = (bufs[1][i] | ( 0x01 << 12)) & 0x3fff;
-				//else
-					//globle_mem_out_[count++] = (0 | ( 0x01 << 12)) & 0x3fff;
+				globle_mem_out_[count++] = (bufs[1][i] | ( 0x01 << 12)) & 0x3fff;
+			}
+			if(enabled_channel_ & ADV_CHANNEL2){
+				globle_mem_out_[count++] = (bufs[2][i] | ( 0x02 << 12)) & 0x3fff;
+			}
+			if(enabled_channel_ & ADV_CHANNEL3){
+				globle_mem_out_[count++] = (bufs[3][i] | ( 0x03 << 12)) & 0x3fff;
 			}
 		}
 		if (count!=data_size*enalbed_channel_count_){

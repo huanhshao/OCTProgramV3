@@ -33,7 +33,6 @@ void OpenCL::BindGLTexture(GLuint front,GLuint back){
 	ReleaseMem(cl_image_mem_front_);
 	cl_image_mem_back_=GenMem(w,h,sizeof(cl_char));
 	cl_image_mem_front_=GenMem(w,h,sizeof(cl_char));
-	cout<<w<<h<<endl;
 }
 OpenCL::~OpenCL(){
 	clReleaseMemObject(clTexMemFront);
