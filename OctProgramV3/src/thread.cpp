@@ -215,4 +215,7 @@ void GetCalibParams(vector<double>& calib_data,int stt,int edd,vector<int>& cali
 	}
 	calib_param.swap(tmp_fuck);
 	assert(calib_param.size()==1024);
+	for (int i=0;i<calib_param.size();i++){
+		if (calib_param[i]>0) calib_param[i]+=46;
+	}
 }
