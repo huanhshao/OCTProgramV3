@@ -104,7 +104,7 @@ namespace OCTProgram{
 		upside_rate_=0.5;
 		wave_property_.resize(total_used_channel);
 		wave_property_[0].Set(WAVE_TRIANGLE,1,0,pd*2/total_used_channel);
-		wave_property_[1].Set(WAVE_TRIANGLE,-1.5,-0.5,pd*2/total_used_channel);
+		wave_property_[1].Set(WAVE_TRIANGLE,-1.5,0.5,pd*2/total_used_channel);
 		wave_property_[2].Set(WAVE_SQUARE,2,2,pd*2/total_used_channel);
 		wave_property_[3].Set(WAVE_SINE,0,0,pd*2/total_used_channel);
 		GenerateBufferData();
